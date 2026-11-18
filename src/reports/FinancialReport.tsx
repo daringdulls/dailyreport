@@ -59,9 +59,8 @@ export default function FinancialReport({
             <tr>
               <th className="wide">Hotel</th>
               <th>Total Rooms</th>
-              <th>Occupied Rooms (incl. FOC)</th>
-              <th>FOC Rooms</th>
-              <th title="Occupied minus FOC: the rooms that earn revenue">Paid Rooms</th>
+              <th>Occupied Rooms</th>
+              <th title="Occupied rooms minus FOC (free) rooms: the rooms that earn revenue">Paid Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
               <th title="Blank = paid rooms × their rates (standard + other rates below) (Setup). Type a figure to override.">Room Revenue</th>
@@ -77,7 +76,6 @@ export default function FinancialReport({
                 <Label>{h.name}</Label>
                 <Calc>{h.totalRooms}</Calc>
                 <Calc>{h.occupied}</Calc>
-                <Calc>{h.foc ?? 0}</Calc>
                 <Calc>{c.hotels[i].paid}</Calc>
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
@@ -98,7 +96,6 @@ export default function FinancialReport({
               <td>TOTAL — ALL HOTELS</td>
               <td>{c.hotelTot.totalRooms}</td>
               <td>{c.hotelTot.occupied}</td>
-              <td>{c.hotelTot.foc}</td>
               <td>{c.hotelTot.paid}</td>
               <td>{c.hotelTot.vacant}</td>
               <td>{pct(c.hotelTot.occ)}</td>

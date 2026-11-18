@@ -265,3 +265,5 @@ tr.warn td.label .flag { display: inline; }
 .avail ul { flex-basis: 100%; margin: 2px 0 0; padding-left: 18px; font-size: 12px; }
 .avail ul.ok { color: #23613f; }
 .avail ul.err { color: var(--danger); }
+.bd-line.foc .bd-label { font-weight: 600; }
+.bd-line.foc .muted { font-size: 12px; }

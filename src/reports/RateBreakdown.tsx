@@ -17,10 +17,10 @@ export default function RateBreakdown({ rep, update }: { rep: DailyReport; updat
   return (
     <div className="breakdown screen-only">
       <div className="breakdown-head">
-        <b>Room rates used today</b>
+        <b>FOC rooms &amp; room rates today</b>
         <span className="muted">
-          Not printed. Enter how many paid rooms were sold at another rate; the rest use the standard rate. Room
-          revenue, ADR and RevPAR above include all of them.
+          Not printed. FOC (free) rooms count as occupied but earn nothing. Of the paid rooms, enter how many were
+          sold at another rate; the rest use the standard rate. Room revenue, ADR and RevPAR above include all of this.
         </span>
       </div>
       {rep.hotels.map((h, i) => (
@@ -28,6 +28,9 @@ export default function RateBreakdown({ rep, update }: { rep: DailyReport; updat
           key={i}
           h={h}
           m={m}
+          onFocChange={(foc) =>
+            update((r) => ({ ...r, hotels: r.hotels.map((x, j) => (j === i ? { ...x, foc } : x)) }))
+          }
           onRoomsChange={(k, rooms) => setRates(i, (rs) => rs.map((x, j) => (j === k ? { ...x, rooms } : x)))}
           onRateChange={(k, rate) => setRates(i, (rs) => rs.map((x, j) => (j === k ? { ...x, rate } : x)))}
           onAdd={() => setRates(i, (rs) => [...rs, { name: 'Local', rate: h.roomRate || 0, rooms: 0 }])}
@@ -42,6 +45,7 @@ export default function RateBreakdown({ rep, update }: { rep: DailyReport; updat
 function HotelRates({
   h,
   m,
+  onFocChange,
   onRoomsChange,
   onRateChange,
   onAdd,
@@ -50,6 +54,7 @@ function HotelRates({
 }: {
   h: HotelRow;
   m: (n: number) => string;
+  onFocChange: (n: number) => void;
   onRoomsChange: (k: number, n: number) => void;
   onRateChange: (k: number, n: number) => void;
   onAdd: () => void;
@@ -58,14 +63,31 @@ function HotelRates({
 }) {
   const rates = h.otherRates ?? [];
   const over = otherRateRooms(h) > paidRooms(h);
+  const focOver = (h.foc || 0) > (h.occupied || 0);
   const manual = h.roomRevenue != null;
   return (
-    <div className={`bd-hotel ${over ? 'over' : ''}`}>
+    <div className={`bd-hotel ${over || focOver ? 'over' : ''}`}>
       <div className="bd-name">
         <b>{h.name}</b>
-        <span className="muted">{paidRooms(h)} paid rooms</span>
+        <span className="muted">
+          {h.occupied || 0} occupied · {paidRooms(h)} paid
+        </span>
       </div>
       <div className="bd-lines">
+        <div className="bd-line foc">
+          <span className="bd-label">FOC (free) rooms</span>
+          <input
+            type="number"
+            className="bd-num rooms"
+            min={0}
+            value={h.foc ?? 0}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => onFocChange(Math.max(0, Number(e.target.value) || 0))}
+            aria-label="FOC rooms"
+          />
+          <span className="muted">counted as occupied, no revenue</span>
+        </div>
+        {focOver && <p className="hint">⚠ More FOC rooms than occupied rooms ({h.occupied || 0}).</p>}
         <div className="bd-line std">
           <span className="bd-label">Standard</span>
           <span className="muted">{m(h.roomRate || 0)} ×</span>

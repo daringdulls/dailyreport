@@ -59,8 +59,7 @@ export default function OperationsReport({
             <tr>
               <th className="wide">Hotel</th>
               <th>Total Rooms</th>
-              <th title="Includes FOC rooms">Occupied Rooms (incl. FOC)</th>
-              <th title="Complimentary rooms: occupied but free of charge">FOC Rooms</th>
+              <th title="Includes FOC (free) rooms, which are entered in the Financial report">Occupied Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
               <th>In-House Guests</th>
@@ -74,11 +73,10 @@ export default function OperationsReport({
               <tr key={i} className={c.hotels[i].focError ? 'warn' : ''}>
                 <Label>
                   {h.name}
-                  {c.hotels[i].focError && <span className="flag screen-only"> ⚠ FOC is more than occupied</span>}
+                  {c.hotels[i].focError && <span className="flag screen-only"> ⚠ FOC rooms (Financial report) exceed occupied</span>}
                 </Label>
                 <Calc>{h.totalRooms}</Calc>
                 <NumIn value={h.occupied} onChange={(v) => set.hotel(i, { occupied: v ?? 0 })} />
-                <NumIn value={h.foc ?? 0} onChange={(v) => set.hotel(i, { foc: v ?? 0 })} />
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
                 <NumIn value={h.inHouse} onChange={(v) => set.hotel(i, { inHouse: v ?? 0 })} />
@@ -91,7 +89,6 @@ export default function OperationsReport({
               <td>TOTAL — ALL HOTELS</td>
               <td>{c.hotelTot.totalRooms}</td>
               <td>{c.hotelTot.occupied}</td>
-              <td>{c.hotelTot.foc}</td>
               <td>{c.hotelTot.vacant}</td>
               <td>{pct(c.hotelTot.occ, 2)}</td>
               <td>{c.hotelTot.inHouse}</td>
