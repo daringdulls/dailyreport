@@ -1,4 +1,4 @@
-import type { DailyReport, DiveRow, OutletRow } from './types';
+import type { DailyReport, DiveRow, HotelRow, OutletRow } from './types';
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + (Number(b) || 0), 0);
 const div = (a: number, b: number) => (b ? a / b : 0);
@@ -27,13 +27,17 @@ export function diveRevenue(d: DiveRow, r: DailyReport['diveRates']) {
   return d.revenueOverride != null ? d.revenueOverride : diveCalcRevenue(d, r);
 }
 
+export const autoRoomRevenue = (h: HotelRow) => (h.occupied || 0) * (h.roomRate || 0);
+export const roomRevenue = (h: HotelRow) => (h.roomRevenue != null ? h.roomRevenue : autoRoomRevenue(h));
+
 /** Every auto-calculated (grey) number for both reports. */
 export function compute(rep: DailyReport) {
   const hotels = rep.hotels.map((h) => ({
     vacant: Math.max(0, h.totalRooms - h.occupied),
     occ: div(h.occupied, h.totalRooms),
-    adr: div(h.roomRevenue, h.occupied),
-    revpar: div(h.roomRevenue, h.totalRooms),
+    revenue: roomRevenue(h),
+    adr: div(roomRevenue(h), h.occupied),
+    revpar: div(roomRevenue(h), h.totalRooms),
   }));
   const hotelTotals = {
     totalRooms: sum(rep.hotels.map((h) => h.totalRooms)),
@@ -41,7 +45,7 @@ export function compute(rep: DailyReport) {
     inHouse: sum(rep.hotels.map((h) => h.inHouse)),
     arrivals: sum(rep.hotels.map((h) => h.arrivals)),
     departures: sum(rep.hotels.map((h) => h.departures)),
-    roomRevenue: sum(rep.hotels.map((h) => h.roomRevenue)),
+    roomRevenue: sum(rep.hotels.map(roomRevenue)),
   };
   const hotelTot = {
     ...hotelTotals,

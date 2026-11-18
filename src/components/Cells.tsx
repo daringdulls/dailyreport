@@ -10,6 +10,7 @@ export function NumIn({
   suffix,
   prefix,
   nullable,
+  autoValue,
 }: {
   value: number | null;
   onChange: (v: number | null) => void;
@@ -17,8 +18,10 @@ export function NumIn({
   suffix?: string;
   prefix?: string;
   nullable?: boolean;
+  autoValue?: number;
 }) {
-  const shown = value == null ? '' : `${prefix ?? ''}${value}${suffix ?? ''}`;
+  const v = value == null ? autoValue : value;
+  const shown = v == null ? '' : `${prefix ?? ''}${v}${suffix ?? ''}`;
   return (
     <td className="in num">
       <input
@@ -27,7 +30,7 @@ export function NumIn({
         inputMode="decimal"
         step={step}
         value={value == null ? '' : value}
-        placeholder={nullable ? 'auto' : '0'}
+        placeholder={nullable ? (autoValue != null ? String(autoValue) : 'auto') : '0'}
         onFocus={(e) => e.target.select()}
         onChange={(e) => {
           const raw = e.target.value;

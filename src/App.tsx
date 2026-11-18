@@ -206,6 +206,23 @@ function Kpi({ label, value, sub, strong }: { label: string; value: string; sub:
   );
 }
 
+function RateRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <label className="row rate">
+      <span>{label}</span>
+      <span className="muted">$</span>
+      <input
+        type="number"
+        className="short"
+        step={0.5}
+        value={value}
+        onFocus={(e) => e.target.select()}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+      />
+    </label>
+  );
+}
+
 function Setup({
   rep,
   update,
@@ -231,8 +248,14 @@ function Setup({
         <div className="card">
           <h3>Hotels</h3>
           {rep.hotels.map((h, i) => (
-            <div className="row" key={i}>
+            <div className="hotel" key={i}>
+             <div className="row">
               <input value={h.name} onChange={(e) => update((r) => ({ ...r, hotels: renameIn(r.hotels, i, e.target.value) }))} />
+              <button className="icon" title="Remove hotel" onClick={() => update((r) => ({ ...r, hotels: r.hotels.filter((_, j) => j !== i) }))}>
+                ×
+              </button>
+             </div>
+             <div className="row sub">
               <input
                 type="number"
                 className="short"
@@ -246,14 +269,67 @@ function Setup({
                 }
               />
               <span className="muted">rooms</span>
-              <button className="icon" onClick={() => update((r) => ({ ...r, hotels: r.hotels.filter((_, j) => j !== i) }))}>
-                ×
-              </button>
+              <span className="muted">rate $</span>
+              <input
+                type="number"
+                className="short"
+                title="Room rate per night"
+                value={h.roomRate ?? 0}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) =>
+                  update((r) => ({
+                    ...r,
+                    hotels: r.hotels.map((x, j) => (j === i ? { ...x, roomRate: Number(e.target.value) || 0 } : x)),
+                  }))
+                }
+              />
+             </div>
             </div>
           ))}
           <button className="add" onClick={() => update((r) => ({ ...r, hotels: [...r.hotels, blankHotel('New hotel', 10)] }))}>
             + Add hotel
           </button>
+        </div>
+        <div className="card">
+          <h3>Rates</h3>
+          <p className="muted">
+            Room revenue = occupied rooms × room rate (set per hotel above). You can still type a different figure in
+            the Financial report.
+          </p>
+          <h4>Meals ($ / pax)</h4>
+          {(
+            [
+              ['breakfast', 'Breakfast'],
+              ['lunch', 'Lunch'],
+              ['dinner', 'Dinner'],
+            ] as const
+          ).map(([k, label]) => (
+            <RateRow
+              key={k}
+              label={label}
+              value={rep.fnbRates[k]}
+              onChange={(v) => update((r) => ({ ...r, fnbRates: { ...r.fnbRates, [k]: v } }))}
+            />
+          ))}
+          <h4>Diving ($ avg.)</h4>
+          {(
+            [
+              ['reefIn', 'Reef dive (in-house)'],
+              ['tigerIn', 'Tiger dive (in-house)'],
+              ['reefWalk', 'Reef dive (walk-in)'],
+              ['tigerWalk', 'Tiger dive (walk-in)'],
+              ['course', 'Course'],
+              ['dhoni', 'Dhoni trip'],
+              ['equip', 'Equipment rental'],
+            ] as const
+          ).map(([k, label]) => (
+            <RateRow
+              key={k}
+              label={label}
+              value={rep.diveRates[k]}
+              onChange={(v) => update((r) => ({ ...r, diveRates: { ...r.diveRates, [k]: v } }))}
+            />
+          ))}
         </div>
         <div className="card">
           <h3>F&amp;B outlets</h3>

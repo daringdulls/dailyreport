@@ -1,5 +1,5 @@
 import type { DailyReport, DiveRates, FnbRates } from '../types';
-import { compute, forecastLabels, longDate, money, pct } from '../calc';
+import { autoRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
 
@@ -53,7 +53,7 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
               <th>Occupied Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
-              <th>Room Revenue</th>
+              <th title="Blank = occupied rooms × room rate (Setup). Type a figure to override.">Room Revenue</th>
               <th>ADR</th>
               <th>RevPAR</th>
               <th>In-House Guests</th>
@@ -68,7 +68,13 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
                 <Calc>{h.occupied}</Calc>
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
-                <NumIn value={h.roomRevenue} prefix="$" onChange={(v) => set.hotel(i, { roomRevenue: v ?? 0 })} />
+                <NumIn
+                  value={h.roomRevenue ?? null}
+                  nullable
+                  autoValue={autoRoomRevenue(h)}
+                  prefix="$"
+                  onChange={(v) => set.hotel(i, { roomRevenue: v })}
+                />
                 <Calc>{m(c.hotels[i].adr)}</Calc>
                 <Calc>{m(c.hotels[i].revpar)}</Calc>
                 <Calc>{h.inHouse}</Calc>

@@ -11,7 +11,8 @@ const hotel = (name: string, totalRooms: number): HotelRow => ({
   remarks: 'All rooms in order; no complaints.',
   forecast: [0, 0, 0, 0, 0, 0, 0],
   forecastNotes: 'Confirmed + tentative bookings',
-  roomRevenue: 0,
+  roomRate: 0,
+  roomRevenue: null,
   projAdr: 0,
   finRemarks: '',
 });
@@ -55,9 +56,9 @@ export function seedReport(date: string): DailyReport {
     finPreparedBy: '',
     currency: 'USD',
     hotels: [
-      { ...hotel('Cozy Roots Fuvahmulah', 11), projAdr: 22.5 },
-      { ...hotel('Cozy Nest Fuvahmulah', 18), projAdr: 23.5 },
-      { ...hotel('Cozy Art Dhangethi', 12), projAdr: 50 },
+      { ...hotel('Cozy Roots Fuvahmulah', 11), roomRate: 55, projAdr: 22.5 },
+      { ...hotel('Cozy Nest Fuvahmulah', 18), roomRate: 65, projAdr: 23.5 },
+      { ...hotel('Cozy Art Dhangethi', 12), roomRate: 50, projAdr: 50 },
     ],
     outlets: [blankOutlet('Cozy Deck Fuvahmulah')],
     dive: ['Cozy Roots Fuvahmulah', 'Cozy Nest Fuvahmulah', 'Maathundi', 'Others'].map(blankDive),
@@ -101,6 +102,7 @@ export function nextDayFrom(prev: DailyReport, date: string): DailyReport {
       remarks: h.remarks,
       forecastNotes: h.forecastNotes,
       projAdr: h.projAdr,
+      roomRate: h.roomRate ?? 0,
       // tomorrow's forecast becomes today's starting point for occupancy
       forecast: shift(h.forecast),
     })),

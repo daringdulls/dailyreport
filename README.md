@@ -13,12 +13,14 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
    projected ADR are carried over; the 7‑day forecast moves forward one day; today's counts start at zero.
 2. Fill in the **Operations report** tab.
 3. Open the **Financial report** tab. Occupancy, in‑house guests, covers, dives and the forecast are already filled
-   in from operations. Enter room revenue per hotel, bar/other revenue, the reef/tiger split of the dives and
+   in from operations. Room revenue fills in as occupied rooms × room rate (type a figure to override it).
+   Enter bar/other revenue, the reef/tiger split of the dives and
    equipment rentals. A ⚠ appears when the dive split doesn't match the operations report.
    If a group's diving revenue needs to be entered by hand, type it in **Override revenue**.
 4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management.
 
-Hotels, outlets and dive groups can be renamed, added or removed under **Setup**.
+Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
+**diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
 
 ## Data storage
 
@@ -29,6 +31,7 @@ regularly, and **Restore backup** to move reports to another computer.
 
 | Figure | Formula |
 | --- | --- |
+| Room revenue | Occupied rooms × room rate (unless overridden) |
 | Vacant rooms | Total rooms − occupied |
 | Occ. % | Occupied ÷ total rooms |
 | ADR | Room revenue ÷ occupied rooms |

@@ -14,7 +14,8 @@ export interface HotelRow {
   forecast: number[]; // 7 values, occupancy % for the next 7 days
   forecastNotes: string;
   // finance
-  roomRevenue: number;
+  roomRate: number; // nightly rate per occupied room (set in Setup)
+  roomRevenue: number | null; // null = auto (occupied × room rate)
   projAdr: number;
   finRemarks: string;
 }
