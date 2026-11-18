@@ -82,6 +82,7 @@ export function seedReport(date: string): DailyReport {
     ],
     fnbRates: { breakfast: 8, lunch: 10, dinner: 12 },
     diveRates: { reefIn: 55, tigerIn: 65, reefWalk: 50, tigerWalk: 61, course: 450, dhoni: 0, equip: 30 },
+    diveRule: { reef: 2, tiger: 1 },
     reviewedBy: '',
     updatedAt: new Date().toISOString(),
   };

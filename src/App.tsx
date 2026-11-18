@@ -484,6 +484,30 @@ function Setup({
               onChange={(v) => update((r) => ({ ...r, fnbRates: { ...r.fnbRates, [k]: v } }))}
             />
           ))}
+          <h4>Diving: dives per diver per day</h4>
+          {(
+            [
+              ['reef', 'Reef dives'],
+              ['tiger', 'Tiger shark dives'],
+            ] as const
+          ).map(([k, label]) => (
+            <label className="row rate" key={k}>
+              <span>{label}</span>
+              <input
+                type="number"
+                className="short"
+                min={0}
+                value={(rep.diveRule ?? { reef: 2, tiger: 1 })[k]}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) =>
+                  update((r) => ({
+                    ...r,
+                    diveRule: { ...(r.diveRule ?? { reef: 2, tiger: 1 }), [k]: Math.max(0, Number(e.target.value) || 0) },
+                  }))
+                }
+              />
+            </label>
+          ))}
           <h4>Diving ($ avg.)</h4>
           {(
             [

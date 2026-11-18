@@ -12,20 +12,41 @@ export function outletRevenue(o: OutletRow, r: DailyReport['fnbRates']) {
   return o.breakfast * r.breakfast + o.lunch * r.lunch + o.dinner * r.dinner;
 }
 
-export function diveCalcRevenue(d: DiveRow, r: DailyReport['diveRates']) {
+export const DEFAULT_DIVE_RULE = { reef: 2, tiger: 1 };
+export const diveRuleOf = (rep: Pick<DailyReport, 'diveRule'>) => rep.diveRule ?? DEFAULT_DIVE_RULE;
+
+/** Reef/tiger dives by the daily rule (each diver: rule.reef reef dives + rule.tiger tiger dives). */
+export function ruleSplit(d: DiveRow, rule: DailyReport['diveRule'] = DEFAULT_DIVE_RULE) {
+  const r = rule ?? DEFAULT_DIVE_RULE;
+  return {
+    reefIn: (d.inHouseDivers || 0) * r.reef,
+    tigerIn: (d.inHouseDivers || 0) * r.tiger,
+    reefWalk: (d.walkInDivers || 0) * r.reef,
+    tigerWalk: (d.walkInDivers || 0) * r.tiger,
+  };
+}
+
+/** The split used for revenue: hand-edited figures if the row was edited, otherwise the rule. */
+export function diveSplit(d: DiveRow, rule?: DailyReport['diveRule']) {
+  if (d.splitManual) return { reefIn: d.reefIn || 0, tigerIn: d.tigerIn || 0, reefWalk: d.reefWalk || 0, tigerWalk: d.tigerWalk || 0 };
+  return ruleSplit(d, rule);
+}
+
+export function diveCalcRevenue(d: DiveRow, r: DailyReport['diveRates'], rule?: DailyReport['diveRule']) {
+  const s = diveSplit(d, rule);
   return (
-    d.reefIn * r.reefIn +
-    d.tigerIn * r.tigerIn +
-    d.reefWalk * r.reefWalk +
-    d.tigerWalk * r.tigerWalk +
+    s.reefIn * r.reefIn +
+    s.tigerIn * r.tigerIn +
+    s.reefWalk * r.reefWalk +
+    s.tigerWalk * r.tigerWalk +
     d.courses * r.course +
     d.dhoniTrips * r.dhoni +
     d.equipRentals * r.equip
   );
 }
 
-export function diveRevenue(d: DiveRow, r: DailyReport['diveRates']) {
-  return d.revenueOverride != null ? d.revenueOverride : diveCalcRevenue(d, r);
+export function diveRevenue(d: DiveRow, r: DailyReport['diveRates'], rule?: DailyReport['diveRule']) {
+  return d.revenueOverride != null ? d.revenueOverride : diveCalcRevenue(d, r, rule);
 }
 
 /** Rooms that pay: occupied minus complimentary (FOC) rooms. */
@@ -92,15 +113,26 @@ export function compute(rep: DailyReport) {
     revenue: sum(outlets.map((o) => o.revenue)),
   };
 
-  const dive = rep.dive.map((d) => ({
-    finInHouse: d.reefIn + d.tigerIn,
-    finWalk: d.reefWalk + d.tigerWalk,
-    revenue: diveRevenue(d, rep.diveRates),
-    calcRevenue: diveCalcRevenue(d, rep.diveRates),
-    // the finance dive split should add up to the dives in the ops report
-    mismatch:
-      d.reefIn + d.tigerIn !== d.inHouseDivers || d.reefWalk + d.tigerWalk !== d.walkInDivers,
-  }));
+  const rule = diveRuleOf(rep);
+  const dive = rep.dive.map((d) => {
+    const split = diveSplit(d, rule);
+    const byRule = ruleSplit(d, rule);
+    return {
+      split,
+      byRule,
+      finInHouse: split.reefIn + split.tigerIn,
+      finWalk: split.reefWalk + split.tigerWalk,
+      revenue: diveRevenue(d, rep.diveRates, rule),
+      calcRevenue: diveCalcRevenue(d, rep.diveRates, rule),
+      // hand-edited split that no longer matches the divers × daily rule
+      mismatch:
+        !!d.splitManual &&
+        (split.reefIn !== byRule.reefIn ||
+          split.tigerIn !== byRule.tigerIn ||
+          split.reefWalk !== byRule.reefWalk ||
+          split.tigerWalk !== byRule.tigerWalk),
+    };
+  });
   const k = <K extends keyof DiveRow>(key: K) => sum(rep.dive.map((d) => d[key] as number));
   const diveTot = {
     inHouseDivers: k('inHouseDivers'),

@@ -1,5 +1,5 @@
 import type { DailyReport, DiveRates, FnbRates } from '../types';
-import { autoRoomRevenue, manualRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
+import { autoRoomRevenue, manualRoomRevenue, diveRuleOf, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
 import RateBreakdown from './RateBreakdown';
@@ -225,11 +225,11 @@ export default function FinancialReport({
               <th className="wide" rowSpan={2}>
                 Hotel
               </th>
-              <th colSpan={2} className="screen-only">
-                In-House dives split
+              <th colSpan={2} className="screen-only" title="Worked out from in-house divers × the daily dive rule (Setup)">
+                In-House dives
               </th>
-              <th colSpan={2} className="screen-only">
-                Walk-in dives split
+              <th colSpan={2} className="screen-only" title="Worked out from walk-in divers × the daily dive rule (Setup)">
+                Walk-in dives
               </th>
               <th rowSpan={2}>In-House Dives</th>
               <th rowSpan={2}>Free/ walkIn Dives</th>
@@ -255,17 +255,26 @@ export default function FinancialReport({
                 <tr key={i} className={cd.mismatch ? 'warn' : ''}>
                   <Label>
                     {d.name}
-                    {cd.mismatch && (
-                      <span className="flag screen-only" title={`Ops report: ${d.inHouseDivers} in-house / ${d.walkInDivers} walk-in divers`}>
+                    {d.splitManual && (
+                      <span className="screen-only dive-edited">
                         {' '}
-                        ⚠ ops: {d.inHouseDivers}/{d.walkInDivers}
+                        <span className="tag" title={`By the daily rule: ${cd.byRule.reefIn} reef / ${cd.byRule.tigerIn} tiger in-house, ${cd.byRule.reefWalk} / ${cd.byRule.tigerWalk} walk-in`}>
+                          edited
+                        </span>
+                        <button className="link" onClick={() => set.dive(i, { splitManual: false })} title="Go back to divers × daily rule">
+                          ↺ rule
+                        </button>
                       </span>
                     )}
                   </Label>
-                  <NumInScreen value={d.reefIn} onChange={(v) => set.dive(i, { reefIn: v })} />
-                  <NumInScreen value={d.tigerIn} onChange={(v) => set.dive(i, { tigerIn: v })} />
-                  <NumInScreen value={d.reefWalk} onChange={(v) => set.dive(i, { reefWalk: v })} />
-                  <NumInScreen value={d.tigerWalk} onChange={(v) => set.dive(i, { tigerWalk: v })} />
+                  {(['reefIn', 'tigerIn', 'reefWalk', 'tigerWalk'] as const).map((k) => (
+                    <NumInScreen
+                      key={k}
+                      value={cd.split[k]}
+                      auto={!d.splitManual}
+                      onChange={(v) => set.dive(i, { ...cd.split, [k]: v, splitManual: true })}
+                    />
+                  ))}
                   <Calc>{cd.finInHouse}</Calc>
                   <Calc>{cd.finWalk}</Calc>
                   <Calc>{d.courses}</Calc>
@@ -298,10 +307,14 @@ export default function FinancialReport({
             </tr>
           </tbody>
         </table>
+        <p className="muted small screen-only">
+          Dives are worked out from the divers in the Operations report: each diver does {diveRuleOf(rep).reef} reef
+          + {diveRuleOf(rep).tiger} tiger dive{diveRuleOf(rep).tiger === 1 ? '' : 's'} a day (change the rule in
+          Setup). Type over a figure for a different day; that row is marked <i>edited</i>.
+        </p>
         {anyMismatch && (
           <p className="hint screen-only">
-            ⚠ The reef/tiger split does not match the dives in the Operations report for the highlighted rows. Check
-            the numbers before presenting.
+            ⚠ The edited rows differ from divers × the daily rule. Check them before presenting, or press ↺ rule.
           </p>
         )}
       </div>
@@ -352,9 +365,9 @@ export default function FinancialReport({
 }
 
 // Input that only shows on screen (the split columns are not on the printed report).
-function NumInScreen({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+function NumInScreen({ value, onChange, auto }: { value: number; onChange: (v: number) => void; auto?: boolean }) {
   return (
-    <td className="in num screen-only">
+    <td className={`in num screen-only ${auto ? 'auto' : ''}`} title={auto ? 'From divers × daily rule. Type to change.' : undefined}>
       <input
         type="number"
         value={value}

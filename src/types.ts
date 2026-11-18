@@ -61,6 +61,8 @@ export interface DiveRow {
   tigerWalk: number;
   equipRentals: number;
   revenueOverride: number | null; // when set, replaces the calculated revenue
+  /** true once the reef/tiger split was edited by hand; otherwise it follows the daily dive rule */
+  splitManual?: boolean;
 }
 
 export interface OccasionRow {
@@ -86,6 +88,11 @@ export interface FnbRates {
   dinner: number;
 }
 
+export interface DiveRule {
+  reef: number;
+  tiger: number;
+}
+
 export interface DiveRates {
   reefIn: number;
   tigerIn: number;
@@ -109,6 +116,8 @@ export interface DailyReport {
   roster: RosterRow[];
   fnbRates: FnbRates;
   diveRates: DiveRates;
+  /** Dives each diver does per day (default 2 reef + 1 tiger). Used to work out the reef/tiger split. */
+  diveRule?: DiveRule;
   reviewedBy: string;
   /** When occupancy was last imported from the availability app (ISO time). */
   availabilityImportedAt?: string;

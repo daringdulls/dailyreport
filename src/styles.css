@@ -269,3 +269,10 @@ tr.warn td.label .flag { display: inline; }
 .rp-table th.rate-name { background: #eaf4f3; font-weight: 600; }
 .rp-table td.in { width: 84px; min-width: 76px; }
 .rp-table td.in input { min-width: 56px; }
+
+/* dive split cells that follow the daily rule */
+td.in.auto { background: #fff9dd; }
+td.in.auto input { color: #6b6343; }
+.dive-edited .tag { display: inline-block; padding: 0 5px; border-radius: 4px; background: #fff3bf; color: #8a6d00; font-size: 10px; font-weight: 600; }
+.dive-edited .link { font-size: 11px; margin-left: 4px; }
+p.small { font-size: 12px; margin: 4px 0; }
