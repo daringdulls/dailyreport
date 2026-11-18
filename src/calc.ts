@@ -34,10 +34,18 @@ export const paidRooms = (h: HotelRow) => Math.max(0, (h.occupied || 0) - (h.foc
 export const otherRateRooms = (h: HotelRow) => (h.otherRates ?? []).reduce((a, r) => a + (r.rooms || 0), 0);
 /** Paid rooms charged at the standard rate = paid rooms not covered by another rate. */
 export const standardRooms = (h: HotelRow) => Math.max(0, paidRooms(h) - otherRateRooms(h));
+const cents = (n: number) => Math.round(n * 100) / 100;
 export const autoRoomRevenue = (h: HotelRow) =>
-  standardRooms(h) * (h.roomRate || 0) +
-  (h.otherRates ?? []).reduce((a, r) => a + (r.rooms || 0) * (r.rate || 0), 0);
-export const roomRevenue = (h: HotelRow) => (h.roomRevenue != null ? h.roomRevenue : autoRoomRevenue(h));
+  cents(
+    standardRooms(h) * (h.roomRate || 0) +
+      (h.otherRates ?? []).reduce((a, r) => a + (r.rooms || 0) * (r.rate || 0), 0),
+  );
+/**
+ * A figure typed into Room Revenue overrides the rates. Blank or 0 means "use the rates":
+ * older reports saved 0 by default, and free rooms are recorded as FOC instead.
+ */
+export const manualRoomRevenue = (h: HotelRow) => (h.roomRevenue ? h.roomRevenue : null);
+export const roomRevenue = (h: HotelRow) => manualRoomRevenue(h) ?? autoRoomRevenue(h);
 
 /** Every auto-calculated (grey) number for both reports. */
 export function compute(rep: DailyReport) {

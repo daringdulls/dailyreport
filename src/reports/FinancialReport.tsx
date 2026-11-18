@@ -1,5 +1,5 @@
 import type { DailyReport, DiveRates, FnbRates } from '../types';
-import { autoRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
+import { autoRoomRevenue, manualRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
 import RateBreakdown from './RateBreakdown';
@@ -78,11 +78,11 @@ export default function FinancialReport({
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
                 <NumIn
-                  value={h.roomRevenue ?? null}
+                  value={manualRoomRevenue(h)}
                   nullable
                   autoValue={autoRoomRevenue(h)}
                   prefix="$"
-                  onChange={(v) => set.hotel(i, { roomRevenue: v })}
+                  onChange={(v) => set.hotel(i, { roomRevenue: v || null })}
                 />
                 <Calc>{m(c.hotels[i].adr)}</Calc>
                 <Calc>{m(c.hotels[i].revpar)}</Calc>

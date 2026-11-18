@@ -1,5 +1,5 @@
 import type { DailyReport, HotelRow, OtherRate } from '../types';
-import { autoRoomRevenue, money, otherRateRooms, paidRooms, standardRooms } from '../calc';
+import { autoRoomRevenue, manualRoomRevenue, money, otherRateRooms, paidRooms, standardRooms } from '../calc';
 
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
@@ -64,7 +64,7 @@ function HotelRates({
   const rates = h.otherRates ?? [];
   const over = otherRateRooms(h) > paidRooms(h);
   const focOver = (h.foc || 0) > (h.occupied || 0);
-  const manual = h.roomRevenue != null;
+  const manual = manualRoomRevenue(h) != null;
   return (
     <div className={`bd-hotel ${over || focOver ? 'over' : ''}`}>
       <div className="bd-name">
