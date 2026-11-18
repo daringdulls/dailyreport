@@ -223,3 +223,30 @@ tr.warn td.label .flag { display: inline; }
   body:not(.print-measure) table.meta td input,
   body:not(.print-measure) table.meta td select { min-width: 0; }
 }
+
+/* room rate breakdown (financial report, screen only) */
+.breakdown { margin: 8px 0 4px; padding: 10px 12px; border: 1px dashed #c9b28f; background: #fffbef; border-radius: 6px; }
+.breakdown-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-bottom: 8px; }
+.breakdown-head .muted { font-size: 12px; }
+.bd-hotel { display: grid; grid-template-columns: minmax(170px, 230px) 1fr; gap: 6px 16px; padding: 8px 0; border-top: 1px solid #efe4cf; }
+.bd-hotel.over .bd-name b { color: var(--danger); }
+.bd-name { display: flex; flex-direction: column; }
+.bd-name .muted { font-size: 12px; }
+.bd-lines { display: flex; flex-direction: column; gap: 4px; }
+.bd-line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bd-line .bd-label { width: 130px; }
+.bd-line input { padding: 3px 6px; border: 1px solid #d8c9a8; border-radius: 4px; background: var(--yellow); }
+.bd-line .bd-num { width: 70px; text-align: right; }
+.bd-line .bd-num.rooms { width: 56px; text-align: center; }
+.bd-line .bd-auto { display: inline-block; width: 56px; text-align: center; background: var(--grey); border: 1px solid #ddd; border-radius: 4px; padding: 3px 0; }
+.bd-line .bd-sum { min-width: 70px; text-align: right; font-variant-numeric: tabular-nums; }
+.bd-line.std .bd-label { font-weight: 600; }
+.bd-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.bd-foot .add { margin-top: 0; }
+.bd-total b { font-variant-numeric: tabular-nums; }
+@media (max-width: 800px) {
+  .bd-hotel { grid-template-columns: 1fr; }
+  .bd-line .bd-label { width: 110px; }
+}
+.card .row.sub.other input:first-child { flex: 1 1 auto; }
+.card button.add.small { font-size: 11px; padding: 2px 8px; margin: 0 0 2px; }

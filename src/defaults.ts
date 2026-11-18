@@ -104,6 +104,7 @@ export function nextDayFrom(prev: DailyReport, date: string): DailyReport {
       forecastNotes: h.forecastNotes,
       projAdr: h.projAdr,
       roomRate: h.roomRate ?? 0,
+      otherRates: (h.otherRates ?? []).map((r) => ({ ...r, rooms: 0 })),
       // tomorrow's forecast becomes today's starting point for occupancy
       forecast: shift(h.forecast),
     })),

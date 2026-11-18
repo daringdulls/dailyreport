@@ -29,7 +29,13 @@ export function diveRevenue(d: DiveRow, r: DailyReport['diveRates']) {
 
 /** Rooms that pay: occupied minus complimentary (FOC) rooms. */
 export const paidRooms = (h: HotelRow) => Math.max(0, (h.occupied || 0) - (h.foc || 0));
-export const autoRoomRevenue = (h: HotelRow) => paidRooms(h) * (h.roomRate || 0);
+/** Paid rooms sold at the other rates (local, agent…). */
+export const otherRateRooms = (h: HotelRow) => (h.otherRates ?? []).reduce((a, r) => a + (r.rooms || 0), 0);
+/** Paid rooms charged at the standard rate = paid rooms not covered by another rate. */
+export const standardRooms = (h: HotelRow) => Math.max(0, paidRooms(h) - otherRateRooms(h));
+export const autoRoomRevenue = (h: HotelRow) =>
+  standardRooms(h) * (h.roomRate || 0) +
+  (h.otherRates ?? []).reduce((a, r) => a + (r.rooms || 0) * (r.rate || 0), 0);
 export const roomRevenue = (h: HotelRow) => (h.roomRevenue != null ? h.roomRevenue : autoRoomRevenue(h));
 
 /** Every auto-calculated (grey) number for both reports. */
@@ -39,6 +45,7 @@ export function compute(rep: DailyReport) {
     occ: div(h.occupied, h.totalRooms),
     paid: paidRooms(h),
     focError: (h.foc || 0) > (h.occupied || 0),
+    rateError: otherRateRooms(h) > paidRooms(h),
     revenue: roomRevenue(h),
     // ADR is revenue per paying room, so FOC rooms don't drag it down
     adr: div(roomRevenue(h), paidRooms(h)),

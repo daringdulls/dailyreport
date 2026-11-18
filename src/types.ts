@@ -15,10 +15,18 @@ export interface HotelRow {
   forecast: number[]; // 7 values, occupancy % for the next 7 days
   forecastNotes: string;
   // finance
-  roomRate: number; // nightly rate per occupied room (set in Setup)
+  roomRate: number; // standard nightly rate per paid room (set in Setup)
+  /** Other rates (local, agent, long stay…). Rooms not listed here are charged at roomRate. */
+  otherRates?: OtherRate[];
   roomRevenue: number | null; // null = auto (occupied × room rate)
   projAdr: number;
   finRemarks: string;
+}
+
+export interface OtherRate {
+  name: string; // e.g. "Local"
+  rate: number; // nightly rate
+  rooms: number; // paid rooms sold at this rate today
 }
 
 export interface OutletRow {

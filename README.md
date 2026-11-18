@@ -21,6 +21,12 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management. Each
    report is automatically scaled (width and height) to fit on one A4 page (Both = two pages, one per report).
 
+**Other room rates (local, agent…).** In **Setup → Hotels**, add *Other rate* lines to a hotel (e.g. *Local $40*).
+In the Financial report, the **Room rates used today** box under the hotel table shows each hotel's paid rooms:
+type how many were sold at each other rate and the rest are charged at the standard rate. Room revenue, ADR and
+RevPAR include every rate; the box is not printed, so the report keeps the same columns. Rate names and amounts
+carry forward each day, the room counts reset to 0.
+
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
 
@@ -45,7 +51,7 @@ API routes (`/api`): `GET /api/reports`, `GET|PUT|DELETE /api/report?date=YYYY-M
 | Figure | Formula |
 | --- | --- |
 | Paid rooms | Occupied rooms − FOC rooms |
-| Room revenue | Paid rooms × room rate (unless overridden) |
+| Room revenue | Standard-rate rooms × standard rate + Σ(rooms at each other rate × that rate), unless typed in |
 | Vacant rooms | Total rooms − occupied |
 | Occ. % | Occupied rooms (incl. FOC) ÷ total rooms |
 | ADR | Room revenue ÷ paid rooms |

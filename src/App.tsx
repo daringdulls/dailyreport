@@ -367,6 +367,13 @@ function Setup({
 }) {
   const renameIn = <T extends { name: string }>(list: T[], i: number, name: string) =>
     list.map((x, j) => (j === i ? { ...x, name } : x));
+  const setRates = (i: number, fn: (rs: NonNullable<DailyReport['hotels'][number]['otherRates']>) => typeof rs) =>
+    update((r) => ({ ...r, hotels: r.hotels.map((x, j) => (j === i ? { ...x, otherRates: fn(x.otherRates ?? []) } : x)) }));
+  const setOther = (i: number, k: number, p: { name?: string; rate?: number }) =>
+    setRates(i, (rs) => rs.map((o, j) => (j === k ? { ...o, ...p } : o)));
+  const removeOther = (i: number, k: number) => setRates(i, (rs) => rs.filter((_, j) => j !== k));
+  const addOther = (i: number) =>
+    setRates(i, (rs) => [...rs, { name: 'Local', rate: rep.hotels[i]?.roomRate ?? 0, rooms: 0 }]);
 
   return (
     <div className="setup">
@@ -413,6 +420,30 @@ function Setup({
                 }
               />
              </div>
+             {(h.otherRates ?? []).map((o, k) => (
+              <div className="row sub other" key={k}>
+               <input
+                 value={o.name}
+                 title="Rate name (e.g. Local)"
+                 onChange={(e) => setOther(i, k, { name: e.target.value })}
+               />
+               <span className="muted">$</span>
+               <input
+                 type="number"
+                 className="short"
+                 title="Nightly rate"
+                 value={o.rate}
+                 onFocus={(e) => e.target.select()}
+                 onChange={(e) => setOther(i, k, { rate: Number(e.target.value) || 0 })}
+               />
+               <button className="icon" title="Remove rate" onClick={() => removeOther(i, k)}>
+                 ×
+               </button>
+              </div>
+             ))}
+             <button className="add small" onClick={() => addOther(i)}>
+               + Other rate (local, agent…)
+             </button>
             </div>
           ))}
           <button className="add" onClick={() => update((r) => ({ ...r, hotels: [...r.hotels, blankHotel('New hotel', 10)] }))}>
@@ -422,8 +453,8 @@ function Setup({
         <div className="card">
           <h3>Rates</h3>
           <p className="muted">
-            Room revenue = occupied rooms × room rate (set per hotel above). You can still type a different figure in
-            the Financial report.
+            Room revenue = paid rooms × standard rate, plus any rooms sold at a hotel's other rates (local, agent…),
+            which you count in the Financial report. You can still type a different figure there.
           </p>
           <h4>Meals ($ / pax)</h4>
           {(

@@ -2,6 +2,7 @@ import type { DailyReport, DiveRates, FnbRates } from '../types';
 import { autoRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
+import RateBreakdown from './RateBreakdown';
 
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
@@ -63,7 +64,7 @@ export default function FinancialReport({
               <th title="Occupied minus FOC: the rooms that earn revenue">Paid Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
-              <th title="Blank = paid rooms (occupied − FOC) × room rate (Setup). Type a figure to override.">Room Revenue</th>
+              <th title="Blank = paid rooms × their rates (standard + other rates below) (Setup). Type a figure to override.">Room Revenue</th>
               <th title="Room revenue ÷ paid rooms">ADR</th>
               <th>RevPAR</th>
               <th>In-House Guests</th>
@@ -110,6 +111,7 @@ export default function FinancialReport({
           </tbody>
         </table>
       </div>
+      <RateBreakdown rep={rep} update={update} />
 
       <Section title="2. NEXT 7 DAYS OCCUPANCY FORECAST — HOTEL-WISE" />
       <div className="tw">
