@@ -49,7 +49,8 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
             <tr>
               <th className="wide">Hotel</th>
               <th>Total Rooms</th>
-              <th>Occupied Rooms</th>
+              <th title="Includes FOC rooms">Occupied Rooms (incl. FOC)</th>
+              <th title="Complimentary rooms: occupied but free of charge">FOC Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
               <th>In-House Guests</th>
@@ -60,10 +61,14 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
           </thead>
           <tbody>
             {rep.hotels.map((h, i) => (
-              <tr key={i}>
-                <Label>{h.name}</Label>
+              <tr key={i} className={c.hotels[i].focError ? 'warn' : ''}>
+                <Label>
+                  {h.name}
+                  {c.hotels[i].focError && <span className="flag screen-only"> ⚠ FOC is more than occupied</span>}
+                </Label>
                 <Calc>{h.totalRooms}</Calc>
                 <NumIn value={h.occupied} onChange={(v) => set.hotel(i, { occupied: v ?? 0 })} />
+                <NumIn value={h.foc ?? 0} onChange={(v) => set.hotel(i, { foc: v ?? 0 })} />
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
                 <NumIn value={h.inHouse} onChange={(v) => set.hotel(i, { inHouse: v ?? 0 })} />
@@ -76,6 +81,7 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
               <td>TOTAL — ALL HOTELS</td>
               <td>{c.hotelTot.totalRooms}</td>
               <td>{c.hotelTot.occupied}</td>
+              <td>{c.hotelTot.foc}</td>
               <td>{c.hotelTot.vacant}</td>
               <td>{pct(c.hotelTot.occ, 2)}</td>
               <td>{c.hotelTot.inHouse}</td>
@@ -124,7 +130,7 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
           <thead>
             <tr>
               <th className="wide">Hotel / Outlet</th>
-              <th>Total Guests Served</th>
+              <th title="Breakfast + lunch + dinner covers">Total Guests Served</th>
               <th>Breakfast Covers</th>
               <th>Lunch Covers</th>
               <th>Dinner Covers</th>
@@ -135,7 +141,7 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
             {rep.outlets.map((o, i) => (
               <tr key={i}>
                 <Label>{o.name}</Label>
-                <NumIn value={o.guestsServed} onChange={(v) => set.outlet(i, { guestsServed: v ?? 0 })} />
+                <Calc>{c.outlets[i].covers}</Calc>
                 <NumIn value={o.breakfast} onChange={(v) => set.outlet(i, { breakfast: v ?? 0 })} />
                 <NumIn value={o.lunch} onChange={(v) => set.outlet(i, { lunch: v ?? 0 })} />
                 <NumIn value={o.dinner} onChange={(v) => set.outlet(i, { dinner: v ?? 0 })} />

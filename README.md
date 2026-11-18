@@ -11,7 +11,8 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 
 1. Pick the **report date** and click **Start report from <previous day>**. Hotels, roster, rates, remarks and
    projected ADR are carried over; the 7‑day forecast moves forward one day; today's counts start at zero.
-2. Fill in the **Operations report** tab.
+2. Fill in the **Operations report** tab. Complimentary rooms go in **FOC Rooms**: they count as occupied
+   (occupancy %) but are excluded from room revenue and ADR on the financial report.
 3. Open the **Financial report** tab. Occupancy, in‑house guests, covers, dives and the forecast are already filled
    in from operations. Room revenue fills in as occupied rooms × room rate (type a figure to override it).
    Enter bar/other revenue, the reef/tiger split of the dives and
@@ -22,19 +23,32 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
 
-## Data storage
+## Data storage (shared)
 
-Reports are saved automatically in the browser (localStorage) on the device you use. Use **Setup → Download backup**
-regularly, and **Restore backup** to move reports to another computer.
+Reports are stored in a private **Vercel Blob** store (`dailyreport-store`), so every device sees the same reports.
+
+- Staff sign in once per device with the team passcode (Vercel env var `APP_PASSCODE`). To change it: Vercel →
+  project `dailyreport` → Settings → Environment Variables → edit `APP_PASSCODE`, then redeploy.
+- Edits are kept on the device immediately and saved to the cloud ~15 seconds after you stop typing, when you switch
+  away from the page, or when you press **Save now**. The header shows *Saved to cloud* / *Unsaved changes*.
+- If two devices edit the same day at once, the second one to save is asked which version to keep. Nothing is
+  overwritten silently.
+- Without internet, edits stay on the device and upload once the connection is back.
+- **Setup → Download backup** still exports every report to a JSON file for safekeeping.
+
+API routes (`/api`): `GET /api/reports`, `GET|PUT|DELETE /api/report?date=YYYY-MM-DD`, all requiring the
+`x-passcode` header.
 
 ## Calculations
 
 | Figure | Formula |
 | --- | --- |
-| Room revenue | Occupied rooms × room rate (unless overridden) |
+| Paid rooms | Occupied rooms − FOC rooms |
+| Room revenue | Paid rooms × room rate (unless overridden) |
 | Vacant rooms | Total rooms − occupied |
-| Occ. % | Occupied ÷ total rooms |
-| ADR | Room revenue ÷ occupied rooms |
+| Occ. % | Occupied rooms (incl. FOC) ÷ total rooms |
+| ADR | Room revenue ÷ paid rooms |
+| Total guests served | Breakfast + lunch + dinner covers |
 | RevPAR | Room revenue ÷ total rooms |
 | F&B revenue | Breakfast × rate + lunch × rate + dinner × rate + bar/other |
 | Avg. spend / guest | F&B revenue ÷ total covers |

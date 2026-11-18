@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import type { DailyReport } from './types';
 import { compute, longDate, money, pct, toIso } from './calc';
 import { blankDive, blankHotel, blankOutlet, nextDayFrom, seedReport } from './defaults';
-import { downloadJson, loadAll, saveAll, type Store } from './storage';
+import { downloadJson, type Store } from './storage';
+import { AuthError, fetchReport, getPasscode, listReports, setPasscode } from './cloud';
+import { useCloudStore, type SyncStatus } from './sync';
 import OperationsReport from './reports/OperationsReport';
 import FinancialReport from './reports/FinancialReport';
 
@@ -15,33 +17,103 @@ const localToday = () => {
 };
 
 export default function App() {
-  const [store, setStore] = useState<Store>(() => loadAll());
-  const dates = useMemo(() => Object.keys(store).sort(), [store]);
-  const [date, setDate] = useState<string>(() => {
-    const ds = Object.keys(loadAll()).sort();
-    return ds.length ? ds[ds.length - 1] : localToday();
-  });
+  const [signedIn, setSignedIn] = useState(() => !!getPasscode());
+  const signOut = useCallback(() => {
+    setPasscode('');
+    setSignedIn(false);
+  }, []);
+  if (!signedIn) return <SignIn onDone={() => setSignedIn(true)} />;
+  return <Reports onAuthFail={signOut} onSignOut={signOut} />;
+}
+
+function SignIn({ onDone }: { onDone: () => void }) {
+  const [code, setCode] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setErr('');
+    try {
+      await listReports(code.trim());
+      setPasscode(code.trim());
+      onDone();
+    } catch (x) {
+      setErr(x instanceof AuthError ? 'That passcode is not right.' : 'Could not reach the server. Check the internet connection.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <main className="signin">
+      <form onSubmit={submit} className="card">
+        <img src="/favicon.svg" alt="" width={40} height={40} />
+        <h2>Cozy Hotel Daily Reports</h2>
+        <p className="muted">Enter the team passcode to open the shared reports.</p>
+        <input
+          type="password"
+          autoFocus
+          value={code}
+          placeholder="Passcode"
+          onChange={(e) => setCode(e.target.value)}
+        />
+        {err && <p className="err">{err}</p>}
+        <button className="primary" disabled={busy || !code.trim()}>
+          {busy ? 'Checking…' : 'Open reports'}
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut: () => void }) {
+  const cloud = useCloudStore(true, onAuthFail);
+  const { store, dates, index, indexLoaded } = cloud;
+  const [date, setDate] = useState<string>(localToday);
+  const [pickedDate, setPickedDate] = useState(false);
   const [tab, setTab] = useState<Tab>('ops');
   const [printTarget, setPrintTarget] = useState<PrintTarget>('both');
-  const [saved, setSaved] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const rep = store[date];
-
+  // open the latest report once the list has loaded (unless the user already picked a date)
   useEffect(() => {
-    const ok = saveAll(store);
-    setSaved(ok);
-  }, [store]);
+    if (indexLoaded && !pickedDate && dates.length) setDate(dates[dates.length - 1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexLoaded]);
 
-  const update = (fn: (r: DailyReport) => DailyReport) =>
-    setStore((s) => (s[date] ? { ...s, [date]: { ...fn(s[date]), updatedAt: new Date().toISOString() } } : s));
+  const { ensureLoaded } = cloud;
+  useEffect(() => {
+    if (indexLoaded) void ensureLoaded(date);
+  }, [date, indexLoaded, index[date]?.etag, ensureLoaded]);
+
+  const pick = (d: string) => {
+    if (!d) return;
+    setPickedDate(true);
+    setDate(d);
+  };
+
+  const rep = store[date];
+  const inCloudNotLoaded = !rep && !!index[date];
+
+  const update = (fn: (r: DailyReport) => DailyReport) => {
+    const cur = store[date];
+    if (cur) cloud.put(date, fn(cur));
+  };
 
   const previous = dates.filter((d) => d < date).pop();
 
-  const createReport = (mode: 'carry' | 'blank') => {
-    const prevRep = previous ? store[previous] : undefined;
+  const createReport = async (mode: 'carry' | 'blank') => {
+    let prevRep = previous ? store[previous] : undefined;
+    if (mode === 'carry' && previous && !prevRep) {
+      try {
+        prevRep = (await fetchReport(previous)).report;
+      } catch {
+        alert('Could not load the previous day from the cloud. Check the connection and try again.');
+        return;
+      }
+    }
     const r = mode === 'carry' && prevRep ? nextDayFrom(prevRep, date) : seedReport(date);
-    setStore((s) => ({ ...s, [date]: r }));
+    cloud.put(date, r);
   };
 
   const doPrint = (t: PrintTarget) => {
@@ -56,20 +128,32 @@ export default function App() {
   };
 
   const removeReport = () => {
-    if (!confirm(`Delete the report for ${longDate(date)}? This cannot be undone.`)) return;
-    setStore((s) => {
-      const n = { ...s };
-      delete n[date];
-      return n;
-    });
+    if (!confirm(`Delete the report for ${longDate(date)} for everyone? This cannot be undone.`)) return;
+    void cloud.remove(date);
+  };
+
+  const backup = async () => {
+    // make sure every date is in the backup, not only those opened on this device
+    const all: Store = { ...store };
+    for (const d of dates) {
+      if (!all[d]) {
+        try {
+          all[d] = (await fetchReport(d)).report;
+        } catch {
+          /* skip */
+        }
+      }
+    }
+    downloadJson(`cozy-reports-backup-${localToday()}.json`, all);
   };
 
   const restore = async (file: File) => {
     try {
       const data = JSON.parse(await file.text()) as Store;
       const count = Object.keys(data).length;
-      if (!confirm(`Restore ${count} report(s) from backup? Reports with the same date will be replaced.`)) return;
-      setStore((s) => ({ ...s, ...data }));
+      if (!confirm(`Restore ${count} report(s) from backup? Reports with the same date will be replaced for everyone.`))
+        return;
+      for (const [d, r] of Object.entries(data)) cloud.put(d, r);
     } catch {
       alert('That file is not a valid backup.');
     }
@@ -90,9 +174,9 @@ export default function App() {
         <div className="controls">
           <label className="date">
             Report date
-            <input type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+            <input type="date" value={date} onChange={(e) => pick(e.target.value)} />
           </label>
-          <select value={dates.includes(date) ? date : ''} onChange={(e) => e.target.value && setDate(e.target.value)}>
+          <select value={dates.includes(date) ? date : ''} onChange={(e) => pick(e.target.value)}>
             <option value="">Saved reports ({dates.length})</option>
             {[...dates].reverse().map((d) => (
               <option key={d} value={d}>
@@ -100,45 +184,68 @@ export default function App() {
               </option>
             ))}
           </select>
-          <span className={`saved ${saved ? 'ok' : 'err'}`}>{saved ? '● Saved' : '● Not saved'}</span>
+          <SyncBadge status={cloud.status} dirty={cloud.dirtyCount} />
+          <button onClick={cloud.saveAllDirty} disabled={!cloud.dirtyCount} title="Save to the cloud now">
+            Save now
+          </button>
+          <button onClick={() => void cloud.refreshIndex()} title="Get the latest reports from the cloud">
+            ↻ Refresh
+          </button>
         </div>
       </header>
 
+      {cloud.conflict && (
+        <div className="conflict screen-only">
+          <b>The {longDate(cloud.conflict)} report was changed on another device while you were editing it.</b>
+          <span>Choose which version to keep:</span>
+          <button onClick={() => void cloud.resolveConflict('theirs')}>Load the other device's version</button>
+          <button className="primary" onClick={() => void cloud.resolveConflict('mine')}>
+            Keep my version
+          </button>
+        </div>
+      )}
+
       {!rep ? (
         <main className="empty screen-only">
-          <h2>No report for {longDate(date)} yet</h2>
-          {previous ? (
-            <>
-              <p>
-                Start from <b>{longDate(previous)}</b>: hotels, roster, rates and remarks are carried over, the forecast
-                moves forward a day, and today's counts start at zero.
-              </p>
-              <button className="primary" onClick={() => createReport('carry')}>
-                Start report from {longDate(previous)}
-              </button>
-              <button onClick={() => createReport('blank')}>Start from the default template</button>
-            </>
+          {!indexLoaded || inCloudNotLoaded ? (
+            <h2 className="muted">Loading reports…</h2>
           ) : (
             <>
-              <p>Start with the default template (3 hotels, Cozy Deck outlet, dive groups, roster and rates).</p>
-              <button className="primary" onClick={() => createReport('blank')}>
-                Create report
-              </button>
+              <h2>No report for {longDate(date)} yet</h2>
+              {previous ? (
+                <>
+                  <p>
+                    Start from <b>{longDate(previous)}</b>: hotels, rates, roster and remarks are carried over, the
+                    forecast moves forward a day, and today's counts start at zero.
+                  </p>
+                  <button className="primary" onClick={() => void createReport('carry')}>
+                    Start report from {longDate(previous)}
+                  </button>
+                  <button onClick={() => void createReport('blank')}>Start from the default template</button>
+                </>
+              ) : (
+                <>
+                  <p>Start with the default template (3 hotels, Cozy Deck outlet, dive groups, roster and rates).</p>
+                  <button className="primary" onClick={() => void createReport('blank')}>
+                    Create report
+                  </button>
+                </>
+              )}
+              <p className="muted">
+                Have a backup file?{' '}
+                <button className="link" onClick={() => fileRef.current?.click()}>
+                  Restore backup
+                </button>
+              </p>
             </>
           )}
-          <p className="muted">
-            Have a backup file?{' '}
-            <button className="link" onClick={() => fileRef.current?.click()}>
-              Restore backup
-            </button>
-          </p>
         </main>
       ) : (
         <>
           <section className="kpis screen-only">
-            <Kpi label="Occupancy" value={pct(c!.hotelTot.occ)} sub={`${c!.hotelTot.occupied} / ${c!.hotelTot.totalRooms} rooms`} />
+            <Kpi label="Occupancy" value={pct(c!.hotelTot.occ)} sub={`${c!.hotelTot.occupied} / ${c!.hotelTot.totalRooms} rooms${c!.hotelTot.foc ? ` · ${c!.hotelTot.foc} FOC` : ''}`} />
             <Kpi label="In-house guests" value={String(c!.hotelTot.inHouse)} sub={`${c!.hotelTot.arrivals} arr · ${c!.hotelTot.departures} dep`} />
-            <Kpi label="ADR" value={money(c!.hotelTot.adr, rep.currency)} sub={`RevPAR ${money(c!.hotelTot.revpar, rep.currency)}`} />
+            <Kpi label="ADR (paid rooms)" value={money(c!.hotelTot.adr, rep.currency)} sub={`RevPAR ${money(c!.hotelTot.revpar, rep.currency)}`} />
             <Kpi label="F&B revenue" value={money(c!.outletTot.revenue, rep.currency)} sub={`${c!.outletTot.covers} covers`} />
             <Kpi label="Diving revenue" value={money(c!.diveTot.revenue, rep.currency)} sub={`${c!.diveTot.inHouseDivers + c!.diveTot.walkInDivers} divers`} />
             <Kpi label="Total revenue" value={money(c!.totalRevenue, rep.currency)} sub="all business units" strong />
@@ -173,9 +280,10 @@ export default function App() {
               <Setup
                 rep={rep}
                 update={update}
-                onBackup={() => downloadJson(`cozy-reports-backup-${localToday()}.json`, store)}
+                onBackup={() => void backup()}
                 onRestore={() => fileRef.current?.click()}
                 onDelete={removeReport}
+                onSignOut={onSignOut}
               />
             )}
           </main>
@@ -188,12 +296,25 @@ export default function App() {
         hidden
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) restore(f);
+          if (f) void restore(f);
           e.target.value = '';
         }}
       />
     </div>
   );
+}
+
+function SyncBadge({ status, dirty }: { status: SyncStatus; dirty: number }) {
+  if (status.kind === 'offline')
+    return (
+      <span className="saved err" title={status.message}>
+        ● Not synced: kept on this device{dirty ? ` (${dirty} unsaved)` : ''}
+      </span>
+    );
+  if (status.kind === 'saving') return <span className="saved busy">● Saving…</span>;
+  if (status.kind === 'loading') return <span className="saved busy">● Loading…</span>;
+  if (dirty) return <span className="saved busy">● Unsaved changes</span>;
+  return <span className="saved ok">● Saved to cloud</span>;
 }
 
 function Kpi({ label, value, sub, strong }: { label: string; value: string; sub: string; strong?: boolean }) {
@@ -229,12 +350,14 @@ function Setup({
   onBackup,
   onRestore,
   onDelete,
+  onSignOut,
 }: {
   rep: DailyReport;
   update: (fn: (r: DailyReport) => DailyReport) => void;
   onBackup: () => void;
   onRestore: () => void;
   onDelete: () => void;
+  onSignOut: () => void;
 }) {
   const renameIn = <T extends { name: string }>(list: T[], i: number, name: string) =>
     list.map((x, j) => (j === i ? { ...x, name } : x));
@@ -362,8 +485,8 @@ function Setup({
         <div className="card">
           <h3>Data</h3>
           <p className="muted">
-            Reports are saved in this browser. Download a backup regularly, and restore it to use the reports on
-            another computer.
+            Reports are saved to the shared cloud store, so every device signed in with the passcode sees the same
+            reports. You can still download a backup file for safekeeping.
           </p>
           <div className="row">
             <button onClick={onBackup}>Download backup</button>
@@ -373,6 +496,7 @@ function Setup({
             <button className="danger" onClick={onDelete}>
               Delete this day's report
             </button>
+            <button onClick={onSignOut}>Sign out</button>
           </div>
         </div>
       </div>

@@ -27,7 +27,9 @@ export function diveRevenue(d: DiveRow, r: DailyReport['diveRates']) {
   return d.revenueOverride != null ? d.revenueOverride : diveCalcRevenue(d, r);
 }
 
-export const autoRoomRevenue = (h: HotelRow) => (h.occupied || 0) * (h.roomRate || 0);
+/** Rooms that pay: occupied minus complimentary (FOC) rooms. */
+export const paidRooms = (h: HotelRow) => Math.max(0, (h.occupied || 0) - (h.foc || 0));
+export const autoRoomRevenue = (h: HotelRow) => paidRooms(h) * (h.roomRate || 0);
 export const roomRevenue = (h: HotelRow) => (h.roomRevenue != null ? h.roomRevenue : autoRoomRevenue(h));
 
 /** Every auto-calculated (grey) number for both reports. */
@@ -35,13 +37,18 @@ export function compute(rep: DailyReport) {
   const hotels = rep.hotels.map((h) => ({
     vacant: Math.max(0, h.totalRooms - h.occupied),
     occ: div(h.occupied, h.totalRooms),
+    paid: paidRooms(h),
+    focError: (h.foc || 0) > (h.occupied || 0),
     revenue: roomRevenue(h),
-    adr: div(roomRevenue(h), h.occupied),
+    // ADR is revenue per paying room, so FOC rooms don't drag it down
+    adr: div(roomRevenue(h), paidRooms(h)),
     revpar: div(roomRevenue(h), h.totalRooms),
   }));
   const hotelTotals = {
     totalRooms: sum(rep.hotels.map((h) => h.totalRooms)),
     occupied: sum(rep.hotels.map((h) => h.occupied)),
+    foc: sum(rep.hotels.map((h) => h.foc || 0)),
+    paid: sum(rep.hotels.map(paidRooms)),
     inHouse: sum(rep.hotels.map((h) => h.inHouse)),
     arrivals: sum(rep.hotels.map((h) => h.arrivals)),
     departures: sum(rep.hotels.map((h) => h.departures)),
@@ -51,7 +58,7 @@ export function compute(rep: DailyReport) {
     ...hotelTotals,
     vacant: hotelTotals.totalRooms - hotelTotals.occupied,
     occ: div(hotelTotals.occupied, hotelTotals.totalRooms),
-    adr: div(hotelTotals.roomRevenue, hotelTotals.occupied),
+    adr: div(hotelTotals.roomRevenue, hotelTotals.paid),
     revpar: div(hotelTotals.roomRevenue, hotelTotals.totalRooms),
   };
 
@@ -61,7 +68,7 @@ export function compute(rep: DailyReport) {
     return { covers, revenue, avgSpend: div(revenue, covers) };
   });
   const outletTot = {
-    guestsServed: sum(rep.outlets.map((o) => o.guestsServed)),
+    guestsServed: sum(rep.outlets.map(outletCovers)),
     breakfast: sum(rep.outlets.map((o) => o.breakfast)),
     lunch: sum(rep.outlets.map((o) => o.lunch)),
     dinner: sum(rep.outlets.map((o) => o.dinner)),

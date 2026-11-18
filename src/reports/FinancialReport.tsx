@@ -50,11 +50,13 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
             <tr>
               <th className="wide">Hotel</th>
               <th>Total Rooms</th>
-              <th>Occupied Rooms</th>
+              <th>Occupied Rooms (incl. FOC)</th>
+              <th>FOC Rooms</th>
+              <th title="Occupied minus FOC: the rooms that earn revenue">Paid Rooms</th>
               <th>Vacant Rooms</th>
               <th>Occ. %</th>
-              <th title="Blank = occupied rooms × room rate (Setup). Type a figure to override.">Room Revenue</th>
-              <th>ADR</th>
+              <th title="Blank = paid rooms (occupied − FOC) × room rate (Setup). Type a figure to override.">Room Revenue</th>
+              <th title="Room revenue ÷ paid rooms">ADR</th>
               <th>RevPAR</th>
               <th>In-House Guests</th>
               <th className="wide">Guest Remarks</th>
@@ -66,6 +68,8 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
                 <Label>{h.name}</Label>
                 <Calc>{h.totalRooms}</Calc>
                 <Calc>{h.occupied}</Calc>
+                <Calc>{h.foc ?? 0}</Calc>
+                <Calc>{c.hotels[i].paid}</Calc>
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
                 <NumIn
@@ -85,6 +89,8 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
               <td>TOTAL — ALL HOTELS</td>
               <td>{c.hotelTot.totalRooms}</td>
               <td>{c.hotelTot.occupied}</td>
+              <td>{c.hotelTot.foc}</td>
+              <td>{c.hotelTot.paid}</td>
               <td>{c.hotelTot.vacant}</td>
               <td>{pct(c.hotelTot.occ)}</td>
               <td>{m(c.hotelTot.roomRevenue)}</td>

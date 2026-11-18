@@ -171,3 +171,20 @@ table.meta td.label { background: var(--teal-2); }
 .card .row.sub { padding-left: 2px; }
 .card .row span { white-space: nowrap; }
 .card .row.sub input.short { flex: 1 1 0; min-width: 56px; }
+
+/* sync + sign-in */
+.saved.busy { color: #a86b00; }
+.controls button { padding: 5px 10px; }
+.controls button:disabled { opacity: 0.45; cursor: default; }
+.conflict {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  max-width: 1200px; margin: 12px auto 0; padding: 10px 14px;
+  background: #fff4e5; border: 1px solid #f0c27a; border-radius: 8px;
+}
+.signin { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.signin form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; text-align: center; align-items: center; }
+.signin h2 { margin: 4px 0 0; }
+.signin input { width: 100%; padding: 9px 10px; border: 1px solid #c6d0d6; border-radius: 6px; }
+.signin button { width: 100%; padding: 9px; }
+.signin .err { color: var(--danger); margin: 0; }
+tr.warn td.label .flag { display: inline; }

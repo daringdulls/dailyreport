@@ -6,7 +6,8 @@ export interface HotelRow {
   name: string;
   totalRooms: number;
   // operations
-  occupied: number;
+  occupied: number; // includes FOC rooms
+  foc: number; // complimentary (free of charge) rooms, counted as occupied but earn no revenue
   inHouse: number;
   arrivals: number;
   departures: number;
@@ -23,7 +24,7 @@ export interface HotelRow {
 export interface OutletRow {
   name: string;
   // operations
-  guestsServed: number;
+  guestsServed: number; // legacy: now always calculated as total covers
   breakfast: number;
   lunch: number;
   dinner: number;

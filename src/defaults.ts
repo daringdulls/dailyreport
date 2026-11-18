@@ -5,6 +5,7 @@ const hotel = (name: string, totalRooms: number): HotelRow => ({
   name,
   totalRooms,
   occupied: 0,
+  foc: 0,
   inHouse: 0,
   arrivals: 0,
   departures: 0,
