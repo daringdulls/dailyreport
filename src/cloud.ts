@@ -54,4 +54,9 @@ export const saveReport = (report: DailyReport, etag: string | null, force = fal
     keepalive: true,
   }).then((r) => r.etag);
 
+export type AvailabilityProperty = { name: string; rooms: number; occupied: number[] };
+/** Occupied rooms per property for the report night + the next 7 nights, from the availability app. */
+export const fetchAvailability = (date: string) =>
+  call<{ nights: string[]; properties: AvailabilityProperty[] }>(`/api/availability?date=${date}`);
+
 export const deleteReport = (date: string) => call(`/api/report?date=${date}`, { method: 'DELETE' });

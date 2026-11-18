@@ -420,6 +420,19 @@ function Setup({
                 }
               />
              </div>
+             <div className="row sub">
+              <input
+                value={h.availabilityName ?? ''}
+                placeholder="Name in availability app (auto)"
+                title="Only needed if the property is named differently in the availability app"
+                onChange={(e) =>
+                  update((r) => ({
+                    ...r,
+                    hotels: r.hotels.map((x, j) => (j === i ? { ...x, availabilityName: e.target.value || undefined } : x)),
+                  }))
+                }
+              />
+             </div>
              {(h.otherRates ?? []).map((o, k) => (
               <div className="row sub other" key={k}>
                <input

@@ -16,6 +16,8 @@ export interface HotelRow {
   forecastNotes: string;
   // finance
   roomRate: number; // standard nightly rate per paid room (set in Setup)
+  /** Property name in the Pixel availability app, if it differs from `name`. */
+  availabilityName?: string;
   /** Other rates (local, agent, long stay…). Rooms not listed here are charged at roomRate. */
   otherRates?: OtherRate[];
   roomRevenue: number | null; // null = auto (occupied × room rate)
@@ -108,5 +110,7 @@ export interface DailyReport {
   fnbRates: FnbRates;
   diveRates: DiveRates;
   reviewedBy: string;
+  /** When occupancy was last imported from the availability app (ISO time). */
+  availabilityImportedAt?: string;
   updatedAt: string;
 }

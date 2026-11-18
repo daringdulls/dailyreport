@@ -1,6 +1,7 @@
 import type { DailyReport, DiveRow, HotelRow, OutletRow } from '../types';
 import { compute, forecastLabels, longDate, pct } from '../calc';
 import { Calc, Label, NumIn, RowTools, Section, TextIn, DateCell } from '../components/Cells';
+import AvailabilityImport from './AvailabilityImport';
 
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
@@ -50,6 +51,7 @@ export default function OperationsReport({
       </table>
       <div className="legend">Legend: Yellow = fill in daily | Grey = auto-calculated (do not edit)</div>
 
+      <AvailabilityImport rep={rep} update={update} />
       <Section title="1. HOTEL OPERATIONS — HOTEL-WISE" />
       <div className="tw">
         <table>

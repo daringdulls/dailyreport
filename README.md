@@ -30,6 +30,19 @@ carry forward each day, the room counts reset to 0.
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
 
+## Import from the availability app
+
+On the Operations report, **⇩ Import occupancy & forecast from availability app** fills *Occupied Rooms* (the
+report night) and the *7-day forecast %* for each hotel from the Pixel availability app
+(`pixel-availability-55z6`). Everything stays editable afterwards; FOC, guests and remarks are untouched.
+
+- Occupied = rooms whose status counts as occupied in the availability app (Occupied, Reserved, Blocked…).
+- Forecast % = occupied rooms that night ÷ the property's rooms in the availability app, rounded.
+- Hotels are matched by name ("Cozy Arts" matches "Cozy Art Dhangethi"). If a property is named differently, set
+  **Setup → Hotels → Name in availability app**.
+- Needs the Vercel env var `AVAILABILITY_FEED_TOKEN` on this project = the availability app's `B2B_FEED_TOKEN`.
+  Optional `AVAILABILITY_FEED_URL` overrides the feed address.
+
 ## Data storage (shared)
 
 Reports are stored in a private **Vercel Blob** store (`dailyreport-store`), so every device sees the same reports.

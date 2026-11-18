@@ -24,8 +24,18 @@ export function NumIn({
   const shown = v == null ? '' : `${prefix ?? ''}${v}${suffix ?? ''}`;
   return (
     <td className="in num">
+      <div
+        className="numwrap screen-only"
+        onMouseDown={(e) => {
+          const input = e.currentTarget.querySelector('input');
+          if (input && e.target !== input) {
+            e.preventDefault();
+            input.focus();
+          }
+        }}
+      >
+      {prefix && <span className="unit">{prefix}</span>}
       <input
-        className="screen-only"
         type="number"
         inputMode="decimal"
         step={step}
@@ -39,6 +49,8 @@ export function NumIn({
           if (!Number.isNaN(n)) onChange(n);
         }}
       />
+      {suffix && <span className="unit">{suffix}</span>}
+      </div>
       <span className="print-only">{shown}</span>
     </td>
   );

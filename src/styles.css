@@ -250,3 +250,18 @@ tr.warn td.label .flag { display: inline; }
 }
 .card .row.sub.other input:first-child { flex: 1 1 auto; }
 .card button.add.small { font-size: 11px; padding: 2px 8px; margin: 0 0 2px; }
+
+/* unit shown inside number cells on screen ($ / %) */
+.numwrap { display: flex; align-items: center; justify-content: center; cursor: text; }
+.numwrap input { flex: 0 1 9ch; width: 9ch; min-width: 0 !important; }
+.numwrap:has(.unit:last-child) input { text-align: right !important; padding-right: 1px; }
+.numwrap:has(.unit:first-child) input { text-align: left !important; padding-left: 1px; }
+.numwrap .unit { color: var(--muted); font-size: 11px; padding: 0 5px; flex: none; }
+.numwrap .unit:first-child { padding-right: 0; }
+
+/* availability import bar (operations report, screen only) */
+.avail { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 0 0 8px; padding: 8px 10px; background: #eef6f5; border: 1px solid #cfe3e1; border-radius: 6px; }
+.avail .muted { font-size: 12px; flex: 1 1 320px; }
+.avail ul { flex-basis: 100%; margin: 2px 0 0; padding-left: 18px; font-size: 12px; }
+.avail ul.ok { color: #23613f; }
+.avail ul.err { color: var(--danger); }
