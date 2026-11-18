@@ -7,7 +7,7 @@ import RateBreakdown from './RateBreakdown';
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
 // Grey cells here come straight from the Operations report; yellow cells are the
-// money-only inputs (room revenue, rates, bar/other, dive-type split).
+// money-only inputs (room revenue, rates, dive-type split).
 export default function FinancialReport({
   rep,
   update,
@@ -167,7 +167,6 @@ export default function FinancialReport({
               <th>Lunch Covers</th>
               <th>Dinner Covers</th>
               <th>Total Covers</th>
-              <th>Bar/Other Rev.</th>
               <th>Total F&amp;B Revenue</th>
               <th>Avg. Spend /Guest</th>
               <th className="wide">Remarks</th>
@@ -181,7 +180,6 @@ export default function FinancialReport({
                 <Calc>{o.lunch}</Calc>
                 <Calc>{o.dinner}</Calc>
                 <Calc>{c.outlets[i].covers}</Calc>
-                <NumIn value={o.barOther} prefix="$" onChange={(v) => set.outlet(i, { barOther: v ?? 0 })} />
                 <Calc className="b">{m(c.outlets[i].revenue)}</Calc>
                 <Calc>{m(c.outlets[i].avgSpend)}</Calc>
                 <TextIn value={o.finRemarks} onChange={(v) => set.outlet(i, { finRemarks: v })} />
@@ -193,7 +191,6 @@ export default function FinancialReport({
               <td>{c.outletTot.lunch}</td>
               <td>{c.outletTot.dinner}</td>
               <td>{c.outletTot.covers}</td>
-              <td>{m(c.outletTot.barOther)}</td>
               <td>{m(c.outletTot.revenue)}</td>
               <td>{m(c.outletTot.covers ? c.outletTot.revenue / c.outletTot.covers : 0)}</td>
               <td />

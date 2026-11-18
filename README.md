@@ -3,7 +3,7 @@
 A web app that builds the two reports presented to management every day:
 
 1. **Daily Operations Report**: occupancy, 7‑day forecast, F&B covers, diving, special occasions, staff roster.
-2. **Daily Financial Report**: built from the operations numbers, plus room revenue, F&B/dive rates and bar/other revenue.
+2. **Daily Financial Report**: built from the operations numbers, plus room revenue and F&B/dive rates.
 
 The layout follows the existing Excel sheets: **yellow cells are filled in daily**, **grey cells are calculated**.
 
@@ -15,7 +15,7 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
    (occupancy %) but are excluded from room revenue and ADR on the financial report.
 3. Open the **Financial report** tab. Occupancy, in‑house guests, covers, dives and the forecast are already filled
    in from operations. Room revenue fills in as occupied rooms × room rate (type a figure to override it).
-   Enter bar/other revenue, the reef/tiger split of the dives and
+   Enter the reef/tiger split of the dives and
    equipment rentals. A ⚠ appears when the dive split doesn't match the operations report.
    If a group's diving revenue needs to be entered by hand, type it in **Override revenue**.
 4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management. Each
@@ -70,7 +70,7 @@ API routes (`/api`): `GET /api/reports`, `GET|PUT|DELETE /api/report?date=YYYY-M
 | ADR | Room revenue ÷ paid rooms |
 | Total guests served | Breakfast + lunch + dinner covers |
 | RevPAR | Room revenue ÷ total rooms |
-| F&B revenue | Breakfast × rate + lunch × rate + dinner × rate + bar/other |
+| F&B revenue | Breakfast × rate + lunch × rate + dinner × rate |
 | Avg. spend / guest | F&B revenue ÷ total covers |
 | Diving revenue | Σ(dives × rate by type) + courses × course rate + dhoni trips × dhoni rate + rentals × rental rate (or the override) |
 | Daily revenue | Rooms + F&B + Diving |

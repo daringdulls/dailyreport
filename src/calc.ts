@@ -8,7 +8,8 @@ export function outletCovers(o: OutletRow) {
 }
 
 export function outletRevenue(o: OutletRow, r: DailyReport['fnbRates']) {
-  return o.breakfast * r.breakfast + o.lunch * r.lunch + o.dinner * r.dinner + (o.barOther || 0);
+  // F&B revenue = covers × allocated meal rates (bar/other revenue is no longer part of the report)
+  return o.breakfast * r.breakfast + o.lunch * r.lunch + o.dinner * r.dinner;
 }
 
 export function diveCalcRevenue(d: DiveRow, r: DailyReport['diveRates']) {
@@ -79,7 +80,6 @@ export function compute(rep: DailyReport) {
     breakfast: sum(rep.outlets.map((o) => o.breakfast)),
     lunch: sum(rep.outlets.map((o) => o.lunch)),
     dinner: sum(rep.outlets.map((o) => o.dinner)),
-    barOther: sum(rep.outlets.map((o) => o.barOther)),
     covers: sum(outlets.map((o) => o.covers)),
     revenue: sum(outlets.map((o) => o.revenue)),
   };

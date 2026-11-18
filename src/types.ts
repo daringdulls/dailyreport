@@ -40,7 +40,7 @@ export interface OutletRow {
   dinner: number;
   remarks: string;
   // finance
-  barOther: number;
+  barOther: number; // legacy, no longer shown or counted
   finRemarks: string;
 }
 
