@@ -21,6 +21,19 @@ export function clearFit() {
   document.querySelectorAll<HTMLElement>('.page').forEach((p) => p.style.removeProperty('--fit'));
 }
 
+/** Fallback for browsers that don't fire 'afterprint': restore on the next interaction. */
+export function clearFitOnNextInteraction() {
+  const done = () => {
+    clearFit();
+    window.removeEventListener('pointerdown', done, true);
+    window.removeEventListener('keydown', done, true);
+    window.removeEventListener('focus', done);
+  };
+  window.addEventListener('pointerdown', done, true);
+  window.addEventListener('keydown', done, true);
+  window.addEventListener('focus', done);
+}
+
 export function installPrintFit() {
   window.addEventListener('beforeprint', fitPages);
   window.addEventListener('afterprint', clearFit);
