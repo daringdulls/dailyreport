@@ -11,7 +11,10 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 
 1. Pick the **report date** (in the header, or in the Report Date cell on either report) and click **Start report from <previous day>**. Hotels, roster, rates, remarks and
    projected ADR are carried over; the 7‑day forecast moves forward one day; today's counts start at zero.
-2. Fill in the **Operations report** tab. Complimentary (FOC) rooms are entered in the Financial report's
+2. Fill in the **Operations report** tab. Section 1 works like a night audit, for rooms and guests separately:
+   **Tonight = Last night + Arrivals today − Departures today**. *Last night* is carried from yesterday's
+   *Tonight* automatically (editable); you enter arrivals and departures; occupied rooms, in-house guests,
+   vacant and Occ. % are calculated. Complimentary (FOC) rooms are entered in the Financial report's
    on-screen **FOC & room rates today** box (not printed): they count as occupied (occupancy %) but are
    excluded from room revenue and ADR.
 3. Open the **Financial report** tab. Occupancy, in‑house guests, covers, dives and the forecast are already filled

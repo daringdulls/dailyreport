@@ -54,50 +54,81 @@ export default function OperationsReport({
       <AvailabilityImport rep={rep} update={update} />
       <Section title="1. HOTEL OPERATIONS — HOTEL-WISE" />
       <div className="tw">
-        <table>
+        <table className="movements">
           <thead>
             <tr>
-              <th className="wide">Hotel</th>
-              <th>Total Rooms</th>
-              <th title="Includes FOC (free) rooms, which are entered in the Financial report">Occupied Rooms</th>
-              <th>Vacant Rooms</th>
-              <th>Occ. %</th>
-              <th>In-House Guests</th>
-              <th>Arrivals Today</th>
-              <th>Departures Today</th>
-              <th className="wide">Guest Remarks</th>
+              <th className="wide" rowSpan={2}>Hotel</th>
+              <th rowSpan={2}>Total Rooms</th>
+              <th colSpan={2} className="grp" title="Carried over from yesterday's report (tonight's figures); can be corrected">
+                Last Night
+              </th>
+              <th colSpan={2} className="grp">Arrivals Today</th>
+              <th colSpan={2} className="grp">Departures Today</th>
+              <th colSpan={2} className="grp tonight" title="Last night + arrivals − departures">
+                Tonight
+              </th>
+              <th rowSpan={2}>Vacant Rooms</th>
+              <th rowSpan={2}>Occ. %</th>
+              <th className="wide" rowSpan={2}>Guest Remarks</th>
+            </tr>
+            <tr>
+              <th>Rooms</th>
+              <th>Guests</th>
+              <th>Rooms</th>
+              <th>Guests</th>
+              <th>Rooms</th>
+              <th>Guests</th>
+              <th className="tonight" title="Includes FOC (free) rooms, which are entered in the Financial report">
+                Occupied Rooms
+              </th>
+              <th className="tonight">In-House Guests</th>
             </tr>
           </thead>
           <tbody>
             {rep.hotels.map((h, i) => (
-              <tr key={i} className={c.hotels[i].focError ? 'warn' : ''}>
+              <tr key={i} className={c.hotels[i].focError || c.hotels[i].moveError ? 'warn' : ''}>
                 <Label>
                   {h.name}
+                  {c.hotels[i].moveError && (
+                    <span className="flag screen-only"> ⚠ check: more leaving than in house, or more rooms than the hotel has</span>
+                  )}
                   {c.hotels[i].focError && <span className="flag screen-only"> ⚠ FOC rooms (Financial report) exceed occupied</span>}
                 </Label>
                 <Calc>{h.totalRooms}</Calc>
-                <NumIn value={h.occupied} onChange={(v) => set.hotel(i, { occupied: v ?? 0 })} />
+                <NumIn value={h.startRooms ?? 0} onChange={(v) => set.hotel(i, { startRooms: v ?? 0 })} />
+                <NumIn value={h.startGuests ?? 0} onChange={(v) => set.hotel(i, { startGuests: v ?? 0 })} />
+                <NumIn value={h.arrivals} onChange={(v) => set.hotel(i, { arrivals: v ?? 0 })} />
+                <NumIn value={h.arrivalGuests ?? 0} onChange={(v) => set.hotel(i, { arrivalGuests: v ?? 0 })} />
+                <NumIn value={h.departures} onChange={(v) => set.hotel(i, { departures: v ?? 0 })} />
+                <NumIn value={h.departureGuests ?? 0} onChange={(v) => set.hotel(i, { departureGuests: v ?? 0 })} />
+                <Calc className="b tonight">{h.occupied}</Calc>
+                <Calc className="b tonight">{h.inHouse}</Calc>
                 <Calc>{c.hotels[i].vacant}</Calc>
                 <Calc>{pct(c.hotels[i].occ)}</Calc>
-                <NumIn value={h.inHouse} onChange={(v) => set.hotel(i, { inHouse: v ?? 0 })} />
-                <NumIn value={h.arrivals} onChange={(v) => set.hotel(i, { arrivals: v ?? 0 })} />
-                <NumIn value={h.departures} onChange={(v) => set.hotel(i, { departures: v ?? 0 })} />
                 <TextIn value={h.remarks} onChange={(v) => set.hotel(i, { remarks: v })} />
               </tr>
             ))}
             <tr className="total">
               <td>TOTAL — ALL HOTELS</td>
               <td>{c.hotelTot.totalRooms}</td>
+              <td>{c.hotelTot.startRooms}</td>
+              <td>{c.hotelTot.startGuests}</td>
+              <td>{c.hotelTot.arrivals}</td>
+              <td>{c.hotelTot.arrivalGuests}</td>
+              <td>{c.hotelTot.departures}</td>
+              <td>{c.hotelTot.departureGuests}</td>
               <td>{c.hotelTot.occupied}</td>
+              <td>{c.hotelTot.inHouse}</td>
               <td>{c.hotelTot.vacant}</td>
               <td>{pct(c.hotelTot.occ, 2)}</td>
-              <td>{c.hotelTot.inHouse}</td>
-              <td>{c.hotelTot.arrivals}</td>
-              <td>{c.hotelTot.departures}</td>
               <td />
             </tr>
           </tbody>
         </table>
+        <p className="muted small screen-only">
+          Tonight = Last night + Arrivals − Departures. “Last night” comes from yesterday’s report automatically; correct
+          it if needed. Rooms and guests are counted separately.
+        </p>
       </div>
 
       <Section title="2. NEXT 7 DAYS OCCUPANCY FORECAST — HOTEL-WISE" />

@@ -68,6 +68,28 @@ export const autoRoomRevenue = (h: HotelRow) =>
 export const manualRoomRevenue = (h: HotelRow) => (h.roomRevenue ? h.roomRevenue : null);
 export const roomRevenue = (h: HotelRow) => manualRoomRevenue(h) ?? autoRoomRevenue(h);
 
+/**
+ * Room & guest movements: tonight = last night + arrivals − departures.
+ * Keeps `occupied` (rooms tonight) and `inHouse` (guests tonight) in sync. Reports
+ * saved before movements existed get a "last night" figure that keeps their totals.
+ */
+export function normalizeHotel(h: HotelRow): HotelRow {
+  const arr = h.arrivals || 0;
+  const dep = h.departures || 0;
+  const ag = h.arrivalGuests || 0;
+  const dg = h.departureGuests || 0;
+  const startRooms = h.startRooms ?? Math.max(0, (h.occupied || 0) - arr + dep);
+  const startGuests = h.startGuests ?? Math.max(0, (h.inHouse || 0) - ag + dg);
+  return {
+    ...h,
+    startRooms,
+    startGuests,
+    occupied: Math.max(0, startRooms + arr - dep),
+    inHouse: Math.max(0, startGuests + ag - dg),
+  };
+}
+export const normalizeReport = (rep: DailyReport): DailyReport => ({ ...rep, hotels: rep.hotels.map(normalizeHotel) });
+
 /** Every auto-calculated (grey) number for both reports. */
 export function compute(rep: DailyReport) {
   const hotels = rep.hotels.map((h) => ({
@@ -75,6 +97,11 @@ export function compute(rep: DailyReport) {
     occ: div(h.occupied, h.totalRooms),
     paid: paidRooms(h),
     focError: (h.foc || 0) > (h.occupied || 0),
+    // more rooms/guests leaving than were in house, or more rooms occupied than exist
+    moveError:
+      (h.departures || 0) > (h.startRooms || 0) ||
+      (h.departureGuests || 0) > (h.startGuests || 0) ||
+      (h.startRooms || 0) + (h.arrivals || 0) - (h.departures || 0) > h.totalRooms,
     rateError: otherRateRooms(h) > paidRooms(h),
     revenue: roomRevenue(h),
     // ADR is revenue per paying room, so FOC rooms don't drag it down
@@ -89,6 +116,10 @@ export function compute(rep: DailyReport) {
     inHouse: sum(rep.hotels.map((h) => h.inHouse)),
     arrivals: sum(rep.hotels.map((h) => h.arrivals)),
     departures: sum(rep.hotels.map((h) => h.departures)),
+    startRooms: sum(rep.hotels.map((h) => h.startRooms || 0)),
+    startGuests: sum(rep.hotels.map((h) => h.startGuests || 0)),
+    arrivalGuests: sum(rep.hotels.map((h) => h.arrivalGuests || 0)),
+    departureGuests: sum(rep.hotels.map((h) => h.departureGuests || 0)),
     roomRevenue: sum(rep.hotels.map(roomRevenue)),
   };
   const hotelTot = {

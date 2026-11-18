@@ -1,5 +1,5 @@
 import type { DailyReport, DiveRow, HotelRow, OutletRow } from './types';
-import { addDays } from './calc';
+import { addDays, normalizeReport } from './calc';
 
 const hotel = (name: string, totalRooms: number): HotelRow => ({
   name,
@@ -93,7 +93,8 @@ export function seedReport(date: string): DailyReport {
  * remarks and projected ADR; clears the daily counts; shifts the 7-day forecast
  * one day forward so only the new last day needs typing.
  */
-export function nextDayFrom(prev: DailyReport, date: string): DailyReport {
+export function nextDayFrom(prevRaw: DailyReport, date: string): DailyReport {
+  const prev = normalizeReport(prevRaw);
   const gap = Math.max(1, Math.round((Date.parse(date) - Date.parse(prev.date)) / 86400000));
   const shift = (f: number[]) => [...f.slice(gap), ...Array(Math.min(7, gap)).fill(0)].slice(0, 7);
   return {
@@ -105,6 +106,11 @@ export function nextDayFrom(prev: DailyReport, date: string): DailyReport {
       forecastNotes: h.forecastNotes,
       projAdr: h.projAdr,
       roomRate: h.roomRate ?? 0,
+      // last night's figures = yesterday's tonight
+      startRooms: h.occupied || 0,
+      startGuests: h.inHouse || 0,
+      occupied: h.occupied || 0,
+      inHouse: h.inHouse || 0,
       availabilityName: h.availabilityName,
       otherRates: (h.otherRates ?? []).map((r) => ({ ...r, rooms: 0 })),
       // tomorrow's forecast becomes today's starting point for occupancy

@@ -6,7 +6,14 @@ export interface HotelRow {
   name: string;
   totalRooms: number;
   // operations
-  occupied: number; // includes FOC rooms
+  occupied: number; // rooms occupied TONIGHT (incl. FOC) = startRooms + arrivals − departures (kept in sync)
+  /** Rooms occupied last night (carried from the previous day's report; editable). */
+  startRooms?: number;
+  /** Guests in house last night (carried from the previous day's report; editable). */
+  startGuests?: number;
+  /** Guests arriving / departing today (arrivals / departures below are ROOMS). */
+  arrivalGuests?: number;
+  departureGuests?: number;
   foc: number; // complimentary (free of charge) rooms, counted as occupied but earn no revenue
   inHouse: number;
   arrivals: number;

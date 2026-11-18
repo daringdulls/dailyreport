@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { DailyReport } from './types';
-import { compute, longDate, money, pct, toIso } from './calc';
+import { compute, longDate, money, normalizeReport, pct, toIso } from './calc';
 import { blankDive, blankHotel, blankOutlet, nextDayFrom, seedReport } from './defaults';
 import { downloadJson, type Store } from './storage';
 import { AuthError, fetchReport, getPasscode, listReports, setPasscode } from './cloud';
@@ -95,12 +95,13 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
     setDate(d);
   };
 
-  const rep = store[date];
+  const rawRep = store[date];
+  const rep = useMemo(() => (rawRep ? normalizeReport(rawRep) : undefined), [rawRep]);
   const inCloudNotLoaded = !rep && !!index[date];
 
+  // every edit goes through the movement rule: tonight = last night + arrivals − departures
   const update = (fn: (r: DailyReport) => DailyReport) => {
-    const cur = store[date];
-    if (cur) cloud.put(date, fn(cur));
+    if (rep) cloud.put(date, normalizeReport(fn(rep)));
   };
 
   const previous = dates.filter((d) => d < date).pop();

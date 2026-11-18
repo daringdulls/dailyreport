@@ -70,7 +70,10 @@ export default function AvailabilityImport({ rep, update }: { rep: DailyReport; 
         availabilityImportedAt: new Date().toISOString(),
         hotels: r.hotels.map((h, i) => {
           const p = plan[i];
-          return p ? { ...h, occupied: p.occupied, forecast: p.forecast } : h;
+          if (!p) return h;
+          // the app gives rooms occupied tonight; keep today's movements and set last night to match
+          const startRooms = Math.max(0, p.occupied - (h.arrivals || 0) + (h.departures || 0));
+          return { ...h, startRooms, occupied: p.occupied, forecast: p.forecast };
         }),
       }));
       const lines = rep.hotels.map((h, i) => {
@@ -100,8 +103,8 @@ export default function AvailabilityImport({ rep, update }: { rep: DailyReport; 
         {busy ? 'Importing…' : '⇩ Import occupancy & forecast from availability app'}
       </button>
       <span className="muted">
-        Fills Occupied Rooms (tonight) and the 7-day forecast %. FOC, guests and remarks are not changed. You can edit
-        everything afterwards.
+        Fills tonight’s occupied rooms (Last night is adjusted to match today’s arrivals and departures) and the
+        7-day forecast %. Guests, FOC and remarks are not changed. You can edit everything afterwards.
         {rep.availabilityImportedAt && (
           <> Last imported {new Date(rep.availabilityImportedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.</>
         )}
