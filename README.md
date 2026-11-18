@@ -12,7 +12,7 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 1. Pick the **report date** (in the header, or in the Report Date cell on either report) and click **Start report from <previous day>**. Hotels, roster, rates, remarks and
    projected ADR are carried over; the 7‑day forecast moves forward one day; today's counts start at zero.
 2. Fill in the **Operations report** tab. Complimentary (FOC) rooms are entered in the Financial report's
-   on-screen **FOC rooms & room rates today** box (not printed): they count as occupied (occupancy %) but are
+   on-screen **FOC & room rates today** box (not printed): they count as occupied (occupancy %) but are
    excluded from room revenue and ADR.
 3. Open the **Financial report** tab. Occupancy, in‑house guests, covers, dives and the forecast are already filled
    in from operations. Room revenue fills in as occupied rooms × room rate (type a figure to override it).
@@ -23,8 +23,9 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
    report is automatically scaled (width and height) to fit on one A4 page (Both = two pages, one per report).
 
 **Other room rates (local, agent…).** In **Setup → Hotels**, add *Other rate* lines to a hotel (e.g. *Local $40*).
-In the Financial report, the **FOC rooms & room rates today** box under the hotel table shows each hotel's paid rooms:
-type how many were sold at each other rate and the rest are charged at the standard rate. Room revenue, ADR and
+In the Financial report, the **FOC & room rates today** table under the hotel table has one row per hotel: enter FOC (free) rooms and how
+many paid rooms were sold at each other rate; the rest are charged at the standard rate. Rate names and prices
+are edited in Setup (the panel's *Edit rates in Setup* link). Room revenue, ADR and
 RevPAR include every rate; the box is not printed, so the report keeps the same columns. Rate names and amounts
 carry forward each day, the room counts reset to 0.
 

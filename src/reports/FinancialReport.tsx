@@ -12,10 +12,12 @@ export default function FinancialReport({
   rep,
   update,
   onPickDate,
+  onOpenSetup,
 }: {
   rep: DailyReport;
   update: Update;
   onPickDate: (date: string) => void;
+  onOpenSetup?: () => void;
 }) {
   const c = compute(rep);
   const set = useRowSetters(update);
@@ -105,7 +107,7 @@ export default function FinancialReport({
           </tbody>
         </table>
       </div>
-      <RateBreakdown rep={rep} update={update} />
+      <RateBreakdown rep={rep} update={update} onOpenSetup={onOpenSetup} />
 
       <Section title="2. NEXT 7 DAYS OCCUPANCY FORECAST — HOTEL-WISE" />
       <div className="tw">

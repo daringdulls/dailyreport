@@ -280,7 +280,7 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
               <OperationsReport rep={rep} update={update} onPickDate={pick} />
             </div>
             <div className={`page fin ${tab === 'fin' ? '' : 'hide-screen'}`}>
-              <FinancialReport rep={rep} update={update} onPickDate={pick} />
+              <FinancialReport rep={rep} update={update} onPickDate={pick} onOpenSetup={() => setTab('setup')} />
             </div>
             {tab === 'setup' && (
               <Setup

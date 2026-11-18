@@ -224,30 +224,7 @@ tr.warn td.label .flag { display: inline; }
   body:not(.print-measure) table.meta td select { min-width: 0; }
 }
 
-/* room rate breakdown (financial report, screen only) */
-.breakdown { margin: 8px 0 4px; padding: 10px 12px; border: 1px dashed #c9b28f; background: #fffbef; border-radius: 6px; }
-.breakdown-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-bottom: 8px; }
-.breakdown-head .muted { font-size: 12px; }
-.bd-hotel { display: grid; grid-template-columns: minmax(170px, 230px) 1fr; gap: 6px 16px; padding: 8px 0; border-top: 1px solid #efe4cf; }
-.bd-hotel.over .bd-name b { color: var(--danger); }
-.bd-name { display: flex; flex-direction: column; }
-.bd-name .muted { font-size: 12px; }
-.bd-lines { display: flex; flex-direction: column; gap: 4px; }
-.bd-line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.bd-line .bd-label { width: 130px; }
-.bd-line input { padding: 3px 6px; border: 1px solid #d8c9a8; border-radius: 4px; background: var(--yellow); }
-.bd-line .bd-num { width: 70px; text-align: right; }
-.bd-line .bd-num.rooms { width: 56px; text-align: center; }
-.bd-line .bd-auto { display: inline-block; width: 56px; text-align: center; background: var(--grey); border: 1px solid #ddd; border-radius: 4px; padding: 3px 0; }
-.bd-line .bd-sum { min-width: 70px; text-align: right; font-variant-numeric: tabular-nums; }
-.bd-line.std .bd-label { font-weight: 600; }
-.bd-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.bd-foot .add { margin-top: 0; }
-.bd-total b { font-variant-numeric: tabular-nums; }
-@media (max-width: 800px) {
-  .bd-hotel { grid-template-columns: 1fr; }
-  .bd-line .bd-label { width: 110px; }
-}
+
 .card .row.sub.other input:first-child { flex: 1 1 auto; }
 .card button.add.small { font-size: 11px; padding: 2px 8px; margin: 0 0 2px; }
 
@@ -265,5 +242,30 @@ tr.warn td.label .flag { display: inline; }
 .avail ul { flex-basis: 100%; margin: 2px 0 0; padding-left: 18px; font-size: 12px; }
 .avail ul.ok { color: #23613f; }
 .avail ul.err { color: var(--danger); }
-.bd-line.foc .bd-label { font-weight: 600; }
-.bd-line.foc .muted { font-size: 12px; }
+
+/* FOC & room rates panel (financial report, screen only) */
+.rates-panel { margin: 10px 0 6px; border: 1px solid #d9e6e5; border-radius: 8px; background: #f7fbfb; padding: 10px 12px 8px; }
+.rates-panel header { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.rates-panel h4 { margin: 0; font-size: 13px; color: var(--teal); }
+.rates-panel header p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.rp-actions { display: flex; gap: 10px; align-items: center; }
+.chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #e6eeee; color: var(--muted); white-space: nowrap; }
+.rp-table th { min-width: 64px; }
+.rp-table td { height: 34px; }
+.rp-table td.in input { text-align: center; }
+.rp-in { display: flex; flex-direction: column; align-items: center; line-height: 1.1; padding: 2px 0; }
+.rp-in input { padding: 2px 4px !important; }
+.rp-in small { font-size: 10px; color: var(--muted); }
+.rp-table td.na { color: #b9c2c7; }
+.rp-table td.bad { background: #fde7e4 !important; }
+.rp-table .tag, .rp-note .tag { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 4px; background: #fff3bf; color: #8a6d00; font-size: 10px; font-weight: 600; vertical-align: middle; }
+.rp-note { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+.rp-note.bad { color: var(--danger); }
+@media screen and (max-width: 800px) {
+  .signoff { flex-direction: column; gap: 10px; }
+  .signoff > div { display: flex; gap: 6px; align-items: flex-end; }
+  .signoff .line { min-width: 0; flex: 1; }
+}
+.rp-table th.rate-name { background: #eaf4f3; font-weight: 600; }
+.rp-table td.in { width: 84px; min-width: 76px; }
+.rp-table td.in input { min-width: 56px; }
