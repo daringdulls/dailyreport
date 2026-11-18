@@ -1,13 +1,21 @@
 import type { DailyReport, DiveRates, FnbRates } from '../types';
 import { autoRoomRevenue, compute, forecastLabels, longDate, money, pct } from '../calc';
-import { Calc, Label, NumIn, Section, TextIn } from '../components/Cells';
+import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
 
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
 // Grey cells here come straight from the Operations report; yellow cells are the
 // money-only inputs (room revenue, rates, bar/other, dive-type split).
-export default function FinancialReport({ rep, update }: { rep: DailyReport; update: Update }) {
+export default function FinancialReport({
+  rep,
+  update,
+  onPickDate,
+}: {
+  rep: DailyReport;
+  update: Update;
+  onPickDate: (date: string) => void;
+}) {
   const c = compute(rep);
   const set = useRowSetters(update);
   const days = forecastLabels(rep.date);
@@ -23,7 +31,7 @@ export default function FinancialReport({ rep, update }: { rep: DailyReport; upd
         <tbody>
           <tr>
             <Label>Report Date:</Label>
-            <td className="in center">{longDate(rep.date)}</td>
+            <DateCell value={rep.date} label={longDate(rep.date)} onPick={onPickDate} />
             <Label>Prepared By:</Label>
             <TextIn value={rep.finPreparedBy} onChange={(v) => update((r) => ({ ...r, finPreparedBy: v }))} />
             <Label>Currency:</Label>

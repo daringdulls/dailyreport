@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 // Yellow = fill in daily, Grey = auto-calculated (same legend as the Excel sheets).
 // Inputs print as plain text via the .print-only span.
@@ -62,13 +62,7 @@ export function TextIn({
   return (
     <td className={`in txt ${className}`} colSpan={colSpan}>
       {multiline ? (
-        <textarea
-          className="screen-only"
-          rows={Math.max(1, Math.ceil(value.length / 40))}
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <AutoTextarea value={value} placeholder={placeholder} onChange={onChange} />
       ) : (
         <input className="screen-only" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
       )}
@@ -104,5 +98,64 @@ export function RowTools({ onRemove }: { onRemove: () => void }) {
         ×
       </button>
     </td>
+  );
+}
+
+/** Report date cell: a date picker on screen (opens that day's report), plain text when printed. */
+export function DateCell({ value, label, onPick }: { value: string; label: string; onPick: (d: string) => void }) {
+  return (
+    <td className="in center">
+      <input
+        className="screen-only"
+        type="date"
+        value={value}
+        title="Pick a date to open (or start) that day's report"
+        onChange={(e) => e.target.value && onPick(e.target.value)}
+      />
+      <span className="print-only">{label}</span>
+    </td>
+  );
+}
+
+/** Textarea that grows with its text, so nothing is cut off on narrow (phone) screens. */
+function AutoTextarea({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  placeholder?: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const grow = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  };
+  useLayoutEffect(grow, [value]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    let w = el.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (el.clientWidth !== w) {
+        w = el.clientWidth;
+        grow();
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <textarea
+      ref={ref}
+      className="screen-only"
+      rows={1}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }

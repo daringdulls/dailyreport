@@ -5,7 +5,7 @@ import { blankDive, blankHotel, blankOutlet, nextDayFrom, seedReport } from './d
 import { downloadJson, type Store } from './storage';
 import { AuthError, fetchReport, getPasscode, listReports, setPasscode } from './cloud';
 import { useCloudStore, type SyncStatus } from './sync';
-import { clearFitOnNextInteraction, fitPages, installPrintFit } from './fitToPage';
+import { fitPages, installPrintFit } from './fitToPage';
 import OperationsReport from './reports/OperationsReport';
 import FinancialReport from './reports/FinancialReport';
 
@@ -128,8 +128,7 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
     document.title = `${name} ${longDate(date)}`;
     setTimeout(() => {
       fitPages(); // also runs on 'beforeprint'; calling it here covers browsers without that event
-      window.print(); // the layout is reset by the 'afterprint' event…
-      clearFitOnNextInteraction(); // …or by the next tap/click where that event is missing
+      window.print();
       document.title = prevTitle;
     }, 50);
   };
@@ -278,10 +277,10 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
 
           <main>
             <div className={`page ops ${tab === 'ops' ? '' : 'hide-screen'}`}>
-              <OperationsReport rep={rep} update={update} />
+              <OperationsReport rep={rep} update={update} onPickDate={pick} />
             </div>
             <div className={`page fin ${tab === 'fin' ? '' : 'hide-screen'}`}>
-              <FinancialReport rep={rep} update={update} />
+              <FinancialReport rep={rep} update={update} onPickDate={pick} />
             </div>
             {tab === 'setup' && (
               <Setup

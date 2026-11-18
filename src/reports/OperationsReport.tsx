@@ -1,6 +1,6 @@
 import type { DailyReport, DiveRow, HotelRow, OutletRow } from '../types';
 import { compute, forecastLabels, longDate, pct } from '../calc';
-import { Calc, Label, NumIn, RowTools, Section, TextIn } from '../components/Cells';
+import { Calc, Label, NumIn, RowTools, Section, TextIn, DateCell } from '../components/Cells';
 
 type Update = (fn: (r: DailyReport) => DailyReport) => void;
 
@@ -15,7 +15,15 @@ export function useRowSetters(update: Update) {
   };
 }
 
-export default function OperationsReport({ rep, update }: { rep: DailyReport; update: Update }) {
+export default function OperationsReport({
+  rep,
+  update,
+  onPickDate,
+}: {
+  rep: DailyReport;
+  update: Update;
+  onPickDate: (date: string) => void;
+}) {
   const c = compute(rep);
   const set = useRowSetters(update);
   const days = forecastLabels(rep.date);
@@ -32,7 +40,7 @@ export default function OperationsReport({ rep, update }: { rep: DailyReport; up
         <tbody>
           <tr>
             <Label>Report Date:</Label>
-            <td className="in center">{longDate(rep.date)}</td>
+            <DateCell value={rep.date} label={longDate(rep.date)} onPick={onPickDate} />
             <Label>Prepared By:</Label>
             <TextIn value={rep.opsPreparedBy} onChange={(v) => update((r) => ({ ...r, opsPreparedBy: v }))} />
             <Label>Shift:</Label>

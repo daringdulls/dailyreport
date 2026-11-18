@@ -9,7 +9,7 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
 
 ## Daily workflow
 
-1. Pick the **report date** and click **Start report from <previous day>**. Hotels, roster, rates, remarks and
+1. Pick the **report date** (in the header, or in the Report Date cell on either report) and click **Start report from <previous day>**. Hotels, roster, rates, remarks and
    projected ADR are carried over; the 7‑day forecast moves forward one day; today's counts start at zero.
 2. Fill in the **Operations report** tab. Complimentary rooms go in **FOC Rooms**: they count as occupied
    (occupancy %) but are excluded from room revenue and ADR on the financial report.
@@ -19,7 +19,7 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
    equipment rentals. A ⚠ appears when the dive split doesn't match the operations report.
    If a group's diving revenue needs to be entered by hand, type it in **Override revenue**.
 4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management. Each
-   report is automatically scaled to fit on one A4 page (Both = two pages, one per report).
+   report is automatically scaled (width and height) to fit on one A4 page (Both = two pages, one per report).
 
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
