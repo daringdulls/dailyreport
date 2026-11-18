@@ -1,4 +1,4 @@
-import type { DailyReport, DiveRates, FnbRates } from '../types';
+import type { DailyReport, FnbRates } from '../types';
 import { autoRoomRevenue, manualRoomRevenue, diveRuleOf, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
@@ -24,7 +24,6 @@ export default function FinancialReport({
   const days = forecastLabels(rep.date);
   const m = (n: number) => money(n, rep.currency);
   const setFnbRate = (k: keyof FnbRates, v: number) => update((r) => ({ ...r, fnbRates: { ...r.fnbRates, [k]: v } }));
-  const setDiveRate = (k: keyof DiveRates, v: number) => update((r) => ({ ...r, diveRates: { ...r.diveRates, [k]: v } }));
   const anyMismatch = c.dive.some((d) => d.mismatch);
 
   return (
@@ -197,28 +196,6 @@ export default function FinancialReport({
 
       <Section title="4. DIVING REVENUE — FUVAHMULAH SCUBA CLUB — HOTEL-WISE" />
       <div className="tw">
-        <table className="rates">
-          <thead>
-            <tr>
-              <th className="wide">Assumed Rate ($ avg.):</th>
-              <th>Reef Dive (Inhouse)</th>
-              <th>Tiger Dive (Inhouse)</th>
-              <th>Reef Dive (Walk In)</th>
-              <th>Tiger Dive (Walk In)</th>
-              <th>Course</th>
-              <th>Dhoni Trip</th>
-              <th>Equip. Rental</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td />
-              {(['reefIn', 'tigerIn', 'reefWalk', 'tigerWalk', 'course', 'dhoni', 'equip'] as const).map((k) => (
-                <NumIn key={k} value={rep.diveRates[k]} prefix="$" onChange={(v) => setDiveRate(k, v ?? 0)} />
-              ))}
-            </tr>
-          </tbody>
-        </table>
         <table>
           <thead>
             <tr>
@@ -310,7 +287,7 @@ export default function FinancialReport({
         <p className="muted small screen-only">
           Dives are worked out from the divers in the Operations report: each diver does {diveRuleOf(rep).reef} reef
           + {diveRuleOf(rep).tiger} tiger dive{diveRuleOf(rep).tiger === 1 ? '' : 's'} a day (change the rule in
-          Setup). Type over a figure for a different day; that row is marked <i>edited</i>.
+          Setup). Type over a figure for a different day; that row is marked <i>edited</i>. Dive prices are set in Setup → Rates.
         </p>
         {anyMismatch && (
           <p className="hint screen-only">
