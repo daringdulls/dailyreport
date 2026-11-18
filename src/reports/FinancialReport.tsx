@@ -1,4 +1,4 @@
-import type { DailyReport, FnbRates } from '../types';
+import type { DailyReport } from '../types';
 import { autoRoomRevenue, manualRoomRevenue, diveRuleOf, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
@@ -23,7 +23,6 @@ export default function FinancialReport({
   const set = useRowSetters(update);
   const days = forecastLabels(rep.date);
   const m = (n: number) => money(n, rep.currency);
-  const setFnbRate = (k: keyof FnbRates, v: number) => update((r) => ({ ...r, fnbRates: { ...r.fnbRates, [k]: v } }));
   const anyMismatch = c.dive.some((d) => d.mismatch);
 
   return (
@@ -136,24 +135,6 @@ export default function FinancialReport({
 
       <Section title="3. FOOD & BEVERAGE REVENUE — HOTEL-WISE" />
       <div className="tw">
-        <table className="rates">
-          <thead>
-            <tr>
-              <th className="wide">Allocated Rate ($ / pax):</th>
-              <th>Breakfast</th>
-              <th>Lunch</th>
-              <th>Dinner</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td />
-              <NumIn value={rep.fnbRates.breakfast} prefix="$" step={0.5} onChange={(v) => setFnbRate('breakfast', v ?? 0)} />
-              <NumIn value={rep.fnbRates.lunch} prefix="$" step={0.5} onChange={(v) => setFnbRate('lunch', v ?? 0)} />
-              <NumIn value={rep.fnbRates.dinner} prefix="$" step={0.5} onChange={(v) => setFnbRate('dinner', v ?? 0)} />
-            </tr>
-          </tbody>
-        </table>
         <table>
           <thead>
             <tr>

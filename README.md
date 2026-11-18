@@ -33,6 +33,8 @@ are edited in Setup (the panel's *Edit rates in Setup* link). Room revenue, ADR 
 RevPAR include every rate; the box is not printed, so the report keeps the same columns. Rate names and amounts
 carry forward each day, the room counts reset to 0.
 
+Meal and dive prices are not shown on the reports; they are set in **Setup → Rates**.
+
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.
 
