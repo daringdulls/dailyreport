@@ -136,33 +136,35 @@ table.meta td.label { background: var(--teal-2); }
   .tabs .spacer { display: none; }
 }
 
-/* ---------- print: A4 portrait, one sheet per page ---------- */
+/* ---------- print: A4 portrait, each report scaled to fit exactly one page ----------
+   body.print-layout is added just before printing (see fitToPage.ts). Each .page is
+   laid out at the printable A4 width, measured, and shrunk with --fit so it never
+   spills onto a second page. */
 @page { size: A4 portrait; margin: 8mm; }
 @media print {
-  body { background: #fff; font-size: 9px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .screen-only { display: none !important; }
-  .print-only { display: inline; }
-  .hide-screen { display: block; }
-  main { max-width: none; margin: 0; padding: 0; }
-  .sheet { border: 0; padding: 0; }
-  .print-ops .page.fin, .print-fin .page.ops { display: none !important; }
-  .print-both .page.ops { break-after: page; }
-  .title { font-size: 14px; padding: 4px; }
-  th { font-size: 8px; min-width: 0; padding: 2px; }
-  th.wide { min-width: 0; }
-  td.label { font-size: 9px; white-space: normal; }
-  th, td { height: 18px; }
-  tr.tall td { height: 22px; }
-  td.in { padding: 1px 4px; }
-  td.in.num, td.in.center { text-align: center; }
-  td.calc, tr.total td { padding: 1px 3px; }
-  .tw { overflow: visible; }
-  .signoff .line { min-width: 160px; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
-
-@media screen {
-  .signoff .print-only.line { display: none; }
-}
+body.print-layout { background: #fff; font-size: 9px; }
+body.print-layout .screen-only { display: none !important; }
+body.print-layout .print-only { display: inline; }
+body.print-layout .hide-screen { display: block; }
+body.print-layout main { max-width: none; margin: 0; padding: 0; }
+body.print-layout .page { width: 194mm; zoom: var(--fit, 1); }
+body.print-layout .sheet { border: 0; padding: 0; }
+body.print-layout .print-ops .page.fin,
+body.print-layout .print-fin .page.ops { display: none !important; }
+body.print-layout .print-both .page.ops { break-after: page; }
+body.print-layout .title { font-size: 14px; padding: 4px; }
+body.print-layout th { font-size: 8px; min-width: 0; padding: 2px; }
+body.print-layout th.wide { min-width: 0; }
+body.print-layout td.label { font-size: 9px; white-space: normal; }
+body.print-layout th, body.print-layout td { height: 18px; }
+body.print-layout tr.tall td { height: 22px; }
+body.print-layout td.in { padding: 1px 4px; }
+body.print-layout td.calc, body.print-layout tr.total td { padding: 1px 3px; }
+body.print-layout .tw { overflow: visible; }
+body.print-layout .signoff .line { min-width: 160px; }
+body:not(.print-layout) .signoff .print-only.line { display: none; }
 
 .card h4 { margin: 12px 0 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
 .card .row.rate span:first-child { flex: 1; }

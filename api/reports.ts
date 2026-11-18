@@ -1,6 +1,6 @@
 // GET /api/reports -> list of saved report dates with their version tags.
 import { list } from '@vercel/blob';
-import { json, unauthorized } from './_shared';
+import { json, unauthorized } from './_shared.js';
 
 export async function GET(req: Request) {
   const denied = unauthorized(req);

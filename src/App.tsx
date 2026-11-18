@@ -5,6 +5,7 @@ import { blankDive, blankHotel, blankOutlet, nextDayFrom, seedReport } from './d
 import { downloadJson, type Store } from './storage';
 import { AuthError, fetchReport, getPasscode, listReports, setPasscode } from './cloud';
 import { useCloudStore, type SyncStatus } from './sync';
+import { fitPages, installPrintFit } from './fitToPage';
 import OperationsReport from './reports/OperationsReport';
 import FinancialReport from './reports/FinancialReport';
 
@@ -75,6 +76,8 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
   const [printTarget, setPrintTarget] = useState<PrintTarget>('both');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  useEffect(installPrintFit, []);
+
   // open the latest report once the list has loaded (unless the user already picked a date)
   useEffect(() => {
     if (indexLoaded && !pickedDate && dates.length) setDate(dates[dates.length - 1]);
@@ -122,7 +125,8 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
     const name = t === 'ops' ? 'Daily_Operations' : t === 'fin' ? 'Daily_Financial' : 'Daily_Reports';
     document.title = `${name}_${date.split('-').reverse().join('')}`;
     setTimeout(() => {
-      window.print();
+      fitPages(); // also runs on 'beforeprint'; calling it here covers browsers without that event
+      window.print(); // the layout is reset by the 'afterprint' event
       document.title = prevTitle;
     }, 50);
   };

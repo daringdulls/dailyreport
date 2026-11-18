@@ -18,7 +18,8 @@ The layout follows the existing Excel sheets: **yellow cells are filled in daily
    Enter bar/other revenue, the reef/tiger split of the dives and
    equipment rentals. A ⚠ appears when the dive split doesn't match the operations report.
    If a group's diving revenue needs to be entered by hand, type it in **Override revenue**.
-4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management.
+4. Click **Print / PDF** (Operations, Financial or Both) and choose *Save as PDF* to share with management. Each
+   report is automatically scaled to fit on one A4 page (Both = two pages, one per report).
 
 Under **Setup** you can set the **room rate per hotel**, the **meal rates** (breakfast/lunch/dinner per pax) and the
 **diving rates**, and rename, add or remove hotels, outlets and dive groups. Rates carry forward to every new day.

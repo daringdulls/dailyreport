@@ -4,7 +4,7 @@
 //        made on another device are never silently overwritten.
 // DELETE /api/report?date=YYYY-MM-DD
 import { BlobPreconditionFailedError, del, get, head, put } from '@vercel/blob';
-import { isDate, json, pathFor, unauthorized } from './_shared';
+import { isDate, json, pathFor, unauthorized } from './_shared.js';
 
 const dateOf = (req: Request) => new URL(req.url).searchParams.get('date');
 
