@@ -122,8 +122,10 @@ function Reports({ onAuthFail, onSignOut }: { onAuthFail: () => void; onSignOut:
   const doPrint = (t: PrintTarget) => {
     setPrintTarget(t);
     const prevTitle = document.title;
-    const name = t === 'ops' ? 'Daily_Operations' : t === 'fin' ? 'Daily_Financial' : 'Daily_Reports';
-    document.title = `${name}_${date.split('-').reverse().join('')}`;
+    // the browser uses the page title as the PDF file name
+    const name =
+      t === 'ops' ? 'Daily Operation Report' : t === 'fin' ? 'Daily Finance Report' : 'Daily Operation & Finance Report';
+    document.title = `${name} ${longDate(date)}`;
     setTimeout(() => {
       fitPages(); // also runs on 'beforeprint'; calling it here covers browsers without that event
       window.print(); // the layout is reset by the 'afterprint' event
