@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { DailyReport } from './types';
-import { compute, longDate, money, normalizeReport, pct, toIso } from './calc';
+import { compute, inHousePersonRate, longDate, money, normalizeReport, pct, toIso } from './calc';
 import { blankDive, blankHotel, blankOutlet, nextDayFrom, seedReport } from './defaults';
 import { downloadJson, type Store } from './storage';
 import { AuthError, fetchReport, getPasscode, listReports, setPasscode } from './cloud';
@@ -485,7 +485,7 @@ function Setup({
               onChange={(v) => update((r) => ({ ...r, fnbRates: { ...r.fnbRates, [k]: v } }))}
             />
           ))}
-          <h4>Diving: dives per diver per day</h4>
+          <h4>Walk-in divers: dives per diver per day</h4>
           {(
             [
               ['reef', 'Reef dives'],
@@ -510,10 +510,13 @@ function Setup({
             </label>
           ))}
           <h4>Diving ($ avg.)</h4>
+          <RateRow
+            label="In-house diver (per person / day)"
+            value={inHousePersonRate(rep.diveRates, rep.diveRule)}
+            onChange={(v) => update((r) => ({ ...r, diveRates: { ...r.diveRates, inHousePerson: v } }))}
+          />
           {(
             [
-              ['reefIn', 'Reef dive (in-house)'],
-              ['tigerIn', 'Tiger dive (in-house)'],
               ['reefWalk', 'Reef dive (walk-in)'],
               ['tigerWalk', 'Tiger dive (walk-in)'],
               ['course', 'Course'],

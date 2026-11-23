@@ -81,7 +81,7 @@ export function seedReport(date: string): DailyReport {
       { dept: 'Diving — Dive Center', staff: 'Alham, Sajidh, Safdhar, Allan, Nivedh, Shabbe, Kesley, Rilley, Maththu, Nagilu, Pabukko, Hassan, Rasel, Lotib, Yasin', role: 'Dive', shift: 'Morning', timeIn: '7:00', timeOut: '13:30', notes: '' },
     ],
     fnbRates: { breakfast: 8, lunch: 10, dinner: 12 },
-    diveRates: { reefIn: 55, tigerIn: 65, reefWalk: 50, tigerWalk: 61, course: 450, dhoni: 0, equip: 30 },
+    diveRates: { inHousePerson: 175, reefIn: 55, tigerIn: 65, reefWalk: 50, tigerWalk: 61, course: 450, dhoni: 0, equip: 30 },
     diveRule: { reef: 2, tiger: 1 },
     reviewedBy: '',
     updatedAt: new Date().toISOString(),

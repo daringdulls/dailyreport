@@ -26,6 +26,16 @@ export function ruleSplit(d: DiveRow, rule: DailyReport['diveRule'] = DEFAULT_DI
   };
 }
 
+/**
+ * Price per in-house diver per day. Reports saved before per-person pricing use the old
+ * per-dive prices × the daily rule (2 × $55 + 1 × $65 = $175), so their totals don't change.
+ */
+export function inHousePersonRate(r: DailyReport['diveRates'], rule?: DailyReport['diveRule']) {
+  if (r.inHousePerson != null) return r.inHousePerson;
+  const x = rule ?? DEFAULT_DIVE_RULE;
+  return x.reef * (r.reefIn || 0) + x.tiger * (r.tigerIn || 0);
+}
+
 /** The split used for revenue: hand-edited figures if the row was edited, otherwise the rule. */
 export function diveSplit(d: DiveRow, rule?: DailyReport['diveRule']) {
   if (d.splitManual) return { reefIn: d.reefIn || 0, tigerIn: d.tigerIn || 0, reefWalk: d.reefWalk || 0, tigerWalk: d.tigerWalk || 0 };
@@ -35,8 +45,8 @@ export function diveSplit(d: DiveRow, rule?: DailyReport['diveRule']) {
 export function diveCalcRevenue(d: DiveRow, r: DailyReport['diveRates'], rule?: DailyReport['diveRule']) {
   const s = diveSplit(d, rule);
   return (
-    s.reefIn * r.reefIn +
-    s.tigerIn * r.tigerIn +
+    // in-house: per person per day; walk-in: per dive (reef / tiger)
+    (d.inHouseDivers || 0) * inHousePersonRate(r, rule) +
     s.reefWalk * r.reefWalk +
     s.tigerWalk * r.tigerWalk +
     d.courses * r.course +
@@ -151,16 +161,14 @@ export function compute(rep: DailyReport) {
     return {
       split,
       byRule,
-      finInHouse: split.reefIn + split.tigerIn,
+      finInHouse: d.inHouseDivers || 0, // in-house divers (persons), charged per person
       finWalk: split.reefWalk + split.tigerWalk,
       revenue: diveRevenue(d, rep.diveRates, rule),
       calcRevenue: diveCalcRevenue(d, rep.diveRates, rule),
       // hand-edited split that no longer matches the divers × daily rule
       mismatch:
         !!d.splitManual &&
-        (split.reefIn !== byRule.reefIn ||
-          split.tigerIn !== byRule.tigerIn ||
-          split.reefWalk !== byRule.reefWalk ||
+        (split.reefWalk !== byRule.reefWalk ||
           split.tigerWalk !== byRule.tigerWalk),
     };
   });

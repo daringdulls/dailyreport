@@ -101,7 +101,9 @@ export interface DiveRule {
 }
 
 export interface DiveRates {
-  reefIn: number;
+  /** In-house divers are charged per person per day (not per dive). */
+  inHousePerson?: number;
+  reefIn: number; // legacy per-dive in-house rates (used only to derive inHousePerson for old reports)
   tigerIn: number;
   reefWalk: number;
   tigerWalk: number;

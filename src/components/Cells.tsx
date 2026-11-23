@@ -83,9 +83,19 @@ export function TextIn({
   );
 }
 
-export function Calc({ children, className = '', colSpan }: { children: ReactNode; className?: string; colSpan?: number }) {
+export function Calc({
+  children,
+  className = '',
+  colSpan,
+  title,
+}: {
+  children: ReactNode;
+  className?: string;
+  colSpan?: number;
+  title?: string;
+}) {
   return (
-    <td className={`calc num ${className}`} colSpan={colSpan}>
+    <td className={`calc num ${className}`} colSpan={colSpan} title={title}>
       {children}
     </td>
   );

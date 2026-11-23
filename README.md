@@ -80,7 +80,8 @@ API routes (`/api`): `GET /api/reports`, `GET|PUT|DELETE /api/report?date=YYYY-M
 | RevPAR | Room revenue ÷ total rooms |
 | F&B revenue | Breakfast × rate + lunch × rate + dinner × rate |
 | Avg. spend / guest | F&B revenue ÷ total covers |
-| Reef / tiger dives | Divers × daily rule (default 2 reef + 1 tiger per diver), unless edited |
+| In-house diving | In-house divers × price per person per day (Setup; starts at $175 = 2 × $55 + $65) |
+| Walk-in reef / tiger dives | Walk-in divers × daily rule (default 2 reef + 1 tiger per diver), unless edited |
 | Diving revenue | Σ(dives × rate by type) + courses × course rate + dhoni trips × dhoni rate + rentals × rental rate (or the override) |
 | Daily revenue | Rooms + F&B + Diving |
 

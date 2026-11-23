@@ -1,5 +1,5 @@
 import type { DailyReport } from '../types';
-import { autoRoomRevenue, manualRoomRevenue, diveRuleOf, compute, forecastLabels, longDate, money, pct } from '../calc';
+import { autoRoomRevenue, manualRoomRevenue, diveRuleOf, inHousePersonRate, compute, forecastLabels, longDate, money, pct } from '../calc';
 import { Calc, Label, NumIn, Section, TextIn, DateCell } from '../components/Cells';
 import { useRowSetters } from './OperationsReport';
 import RateBreakdown from './RateBreakdown';
@@ -183,13 +183,12 @@ export default function FinancialReport({
               <th className="wide" rowSpan={2}>
                 Hotel
               </th>
-              <th colSpan={2} className="screen-only" title="Worked out from in-house divers × the daily dive rule (Setup)">
-                In-House dives
+              <th rowSpan={2} title="In-house divers from the Operations report, charged per person per day">
+                In-House Divers
               </th>
               <th colSpan={2} className="screen-only" title="Worked out from walk-in divers × the daily dive rule (Setup)">
                 Walk-in dives
               </th>
-              <th rowSpan={2}>In-House Dives</th>
               <th rowSpan={2}>Free/ walkIn Dives</th>
               <th rowSpan={2}>Courses</th>
               <th rowSpan={2}>Dhoni Trips</th>
@@ -200,8 +199,6 @@ export default function FinancialReport({
               <th rowSpan={2}>Total Diving Revenue</th>
             </tr>
             <tr className="screen-only">
-              <th>Reef</th>
-              <th>Tiger</th>
               <th>Reef</th>
               <th>Tiger</th>
             </tr>
@@ -216,7 +213,7 @@ export default function FinancialReport({
                     {d.splitManual && (
                       <span className="screen-only dive-edited">
                         {' '}
-                        <span className="tag" title={`By the daily rule: ${cd.byRule.reefIn} reef / ${cd.byRule.tigerIn} tiger in-house, ${cd.byRule.reefWalk} / ${cd.byRule.tigerWalk} walk-in`}>
+                        <span className="tag" title={`By the daily rule: ${cd.byRule.reefWalk} reef / ${cd.byRule.tigerWalk} tiger walk-in dives`}>
                           edited
                         </span>
                         <button className="link" onClick={() => set.dive(i, { splitManual: false })} title="Go back to divers × daily rule">
@@ -225,7 +222,10 @@ export default function FinancialReport({
                       </span>
                     )}
                   </Label>
-                  {(['reefIn', 'tigerIn', 'reefWalk', 'tigerWalk'] as const).map((k) => (
+                  <Calc title={`${cd.finInHouse} × ${m(inHousePersonRate(rep.diveRates, rep.diveRule))} per person`}>
+                    {cd.finInHouse}
+                  </Calc>
+                  {(['reefWalk', 'tigerWalk'] as const).map((k) => (
                     <NumInScreen
                       key={k}
                       value={cd.split[k]}
@@ -233,7 +233,6 @@ export default function FinancialReport({
                       onChange={(v) => set.dive(i, { ...cd.split, [k]: v, splitManual: true })}
                     />
                   ))}
-                  <Calc>{cd.finInHouse}</Calc>
                   <Calc>{cd.finWalk}</Calc>
                   <Calc>{d.courses}</Calc>
                   <Calc>{d.dhoniTrips}</Calc>
@@ -254,8 +253,8 @@ export default function FinancialReport({
             })}
             <tr className="total">
               <td>TOTAL — ALL HOTELS</td>
-              <td className="screen-only" colSpan={4} />
               <td>{c.diveTot.finInHouse}</td>
+              <td className="screen-only" colSpan={2} />
               <td>{c.diveTot.finWalk}</td>
               <td>{c.diveTot.courses}</td>
               <td>{c.diveTot.dhoniTrips}</td>
@@ -266,9 +265,10 @@ export default function FinancialReport({
           </tbody>
         </table>
         <p className="muted small screen-only">
-          Dives are worked out from the divers in the Operations report: each diver does {diveRuleOf(rep).reef} reef
-          + {diveRuleOf(rep).tiger} tiger dive{diveRuleOf(rep).tiger === 1 ? '' : 's'} a day (change the rule in
-          Setup). Type over a figure for a different day; that row is marked <i>edited</i>. Dive prices are set in Setup → Rates.
+          In-house divers are charged per person: {m(inHousePersonRate(rep.diveRates, rep.diveRule))} a day each. Walk-in
+          dives are worked out from walk-in divers × {diveRuleOf(rep).reef} reef + {diveRuleOf(rep).tiger} tiger dive
+          {diveRuleOf(rep).tiger === 1 ? '' : 's'} a day; type over a figure for a different day (the row is marked{' '}
+          <i>edited</i>). Prices and the rule are set in Setup → Rates.
         </p>
         {anyMismatch && (
           <p className="hint screen-only">
